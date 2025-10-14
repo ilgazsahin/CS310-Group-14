@@ -12,7 +12,7 @@ Enable students to create their own events, find what’s relevant, follow inter
 |--------------------|------------|----------------------------------|
 | Bahar Akbaş        | 30860      |Testing & Quality Assurance Lead  |
 | Ilgaz Şahin        | 30756      |Integration & Repository Lead     |
-| Emre Berk Hamarat  | 31188      |                                  |
+| Emre Berk Hamarat  | 31188      |Testing & Quality Assurance Lead  |
 | Elif Sude Yanar    | 32431      |Project Coordinator               |
 | Ezgi Aslantürk     | 33937      |                                  | 
 | Nil Karahan        | 32142      |                                  |
