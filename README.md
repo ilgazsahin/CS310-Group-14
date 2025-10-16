@@ -14,5 +14,5 @@ Enable students to create their own events, find what’s relevant, follow inter
 | Ilgaz Şahin        | 30756      |Integration & Repository Lead     |
 | Emre Berk Hamarat  | 31188      |Testing & Quality Assurance Lead  |
 | Elif Sude Yanar    | 32431      |Project Coordinator               |
-| Ezgi Aslantürk     | 33937      |                                  | 
-| Nil Karahan        | 32142      |                                  |
+| Ezgi Aslantürk     | 33937      |Presentation & Communication Lead | 
+| Nil Karahan        | 32142      |Documentation & Submission Lead   |
