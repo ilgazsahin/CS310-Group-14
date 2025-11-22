@@ -1,108 +1,127 @@
 import 'package:flutter/material.dart';
-import '../theme.dart';
+import '../utils/app_styles.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: kFavMaroon,
-        foregroundColor: Colors.white,
-        title: const Text('Profile'),
-      ),
-      body: Container(
-        color: const Color(0xFFF5F5F5),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Simple mock user header
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 28,
-                      child: Icon(Icons.person, size: 32),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Student Name',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'student@sabanciuniv.edu',
-                          style: TextStyle(fontSize: 13, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // The important part: button that opens Favorite Events
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.favorite, color: kFavMaroon),
-                title: const Text(
-                  'Favorite Events',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: const Text('See events you have saved as favorite'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.pushNamed(context, '/favorites');
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      // Common navbar
+      backgroundColor: AppColors.primaryPurple,
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: kFavMaroon,
+        backgroundColor: Color(0xFF900040),
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white70,
+        currentIndex: 4,
         type: BottomNavigationBarType.fixed,
-        currentIndex: 4, // Profile tab selected
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box), label: 'Add'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.confirmation_num), label: 'Tickets'),
+          BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined), label: 'Add'),
+          BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: 'Tickets'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushNamed(context, '/');
-          } else if (index == 2) {
-            Navigator.pushNamed(context, '/create-event');
-          } else if (index == 4) {
-            // already on Profile, do nothing
-          }
-          // You can decide later what to do with Search / Tickets
-        },
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage('https://i.pravatar.cc/300'),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Efe Aslan', style: AppTextStyles.headerName),
+                          SizedBox(height: 5),
+                          Text(
+                            'Faculty of Arts and\nSocial Sciences',
+                            style: AppTextStyles.headerDepartment,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10.0, top: 10),
+                    child: Text(
+                      'Edit your profile picture',
+                      style: TextStyle(color: AppColors.accentGreen, fontSize: 12),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+                _buildProfileButton(context, 'Edit My Profile', () {}),
+                const SizedBox(height: 15),
+
+                _buildProfileButton(context, 'Favorite Events', () {}),
+                const SizedBox(height: 15),
+
+                _buildProfileButton(context, 'My Listings', () {
+                  Navigator.pushNamed(context, '/my_listings');
+                }),
+                const SizedBox(height: 15),
+
+                _buildProfileButton(context, 'Settings', () {}),
+                const SizedBox(height: 15),
+
+                Container(
+                  width: double.infinity,
+                  height: 55,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'LOG OUT []->',
+                      style: TextStyle(
+                        color: Color(0xFF900040),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileButton(BuildContext context, String text, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 55,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(text, style: AppTextStyles.buttonText),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.accentGreen),
+          ],
+        ),
       ),
     );
   }

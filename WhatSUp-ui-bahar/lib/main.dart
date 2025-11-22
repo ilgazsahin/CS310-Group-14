@@ -6,7 +6,8 @@ import 'screens/welcome_page.dart';
 import 'screens/event_detail_page.dart';
 import 'screens/create_event_page.dart';
 import 'screens/favorite_events_page.dart';
-import 'screens/profile_page.dart';
+import 'screens/profile_screen.dart';
+import 'screens/my_listings_screen.dart';
 
 
 void main() {
@@ -34,7 +35,8 @@ class MyApp extends StatelessWidget {
         '/create-event': (context) => const CreateEventPage(),
         '/favorites': (context) => const FavoriteEventsPage(),
         '/event-detail': (context) => const EventDetailPage(),
-        '/profile': (context) => const ProfilePage(),
+        '/profile': (context) => const ProfileScreen(),
+        '/my_listings': (context) => const MyListingsScreen(),
       },
     );
   }
@@ -77,6 +79,10 @@ class HomePage extends StatelessWidget {
               onPressed: () => Navigator.pushNamed(context, '/event-detail'),
               child: const Text('Event Detail (dev)'),
             ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, '/profile'),
+              child: const Text('Profile'),
           ],
         ),
       ),
