@@ -8,6 +8,8 @@ import 'screens/create_event_page.dart';
 import 'screens/favorite_events_page.dart';
 import 'screens/profile_screen.dart';
 import 'screens/my_listings_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/search_screen.dart';
 
 
 void main() {
@@ -31,12 +33,13 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const WelcomePage(),
-        '/home': (context) => const HomePage(), // simple internal menu
         '/create-event': (context) => const CreateEventPage(),
         '/favorites': (context) => const FavoriteEventsPage(),
         '/event-detail': (context) => const EventDetailPage(),
         '/profile': (context) => const ProfileScreen(),
         '/my_listings': (context) => const MyListingsScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/search': (context) => const SearchScreen(),
       },
     );
   }
