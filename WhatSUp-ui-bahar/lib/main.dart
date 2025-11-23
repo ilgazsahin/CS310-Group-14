@@ -10,7 +10,7 @@ import 'screens/profile_screen.dart';
 import 'screens/my_listings_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/search_screen.dart';
-
+import 'screens/tickets_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/my_listings': (context) => const MyListingsScreen(),
         '/home': (context) => const HomeScreen(),
         '/search': (context) => const SearchScreen(),
+        '/tickets': (context) => const TicketsPage(),
       },
     );
   }
@@ -86,6 +87,7 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () => Navigator.pushNamed(context, '/profile'),
               child: const Text('Profile'),
+            ),
           ],
         ),
       ),

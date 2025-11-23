@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/listing_model.dart';
 import '../utils/app_styles.dart';
+import '../theme.dart';
 
 class MyListingsScreen extends StatefulWidget {
   const MyListingsScreen({super.key});
@@ -56,10 +57,10 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
         },
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFF900040),
+        backgroundColor: kFavMaroon,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white70,
-        currentIndex: 4,
+        currentIndex: 4, // 0=Home,1=Search,2=Add,3=Tickets,4=Profile
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -68,9 +69,29 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: 'Tickets'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/home');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/search');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/create-event');
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/tickets');
+              break;
+            case 4:
+              Navigator.pushNamed(context, '/profile');
+              break;
+          }
+        },
       ),
     );
   }
+
   Widget _buildListingCard(Listing listing) {
     return Card(
       margin: const EdgeInsets.only(bottom: 20),

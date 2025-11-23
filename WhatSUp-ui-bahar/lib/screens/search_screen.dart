@@ -45,20 +45,36 @@ class SearchScreen extends StatelessWidget {
         backgroundColor: AppColors.navBarBg,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white70,
-        currentIndex: 1,
+        currentIndex: 1, // 0=Home,1=Search,2=Add,3=Tickets,4=Profile
         type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
-          }
-        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined), label: 'Add'),
-          BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: 'Tickets'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.add_box_outlined), label: 'Add'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.confirmation_number), label: 'Tickets'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/home');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/search');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/create-event');
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/tickets');
+              break;
+            case 4:
+              Navigator.pushNamed(context, '/profile');
+              break;
+          }
+        },
       ),
       body: SingleChildScrollView(
         child: Column(

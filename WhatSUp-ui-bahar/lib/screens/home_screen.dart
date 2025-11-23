@@ -51,13 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppColors.navBarBg,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white60,
-        currentIndex: 0,
+        currentIndex: 0, // 0=Home,1=Search,2=Add,3=Tickets,4=Profile
         type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.pushReplacementNamed(context, '/search');
-          }
-        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
@@ -65,7 +60,27 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: 'Tickets'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/home');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/search');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/create-event');
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/tickets');
+              break;
+            case 4:
+              Navigator.pushNamed(context, '/profile');
+              break;
+          }
+        },
       ),
+
 
       // GÖVDE (SCROLLABLE)
       body: SingleChildScrollView(
