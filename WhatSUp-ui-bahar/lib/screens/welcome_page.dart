@@ -128,12 +128,7 @@ class WelcomePage extends StatelessWidget {
                     _GradientButton(
                       text: 'LOGIN',
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/login');
                       },
                     ),
 
@@ -143,12 +138,7 @@ class WelcomePage extends StatelessWidget {
                     _GradientButton(
                       text: 'SIGN UP',
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignUpPage(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/signup');
                       },
                     ),
 
@@ -275,31 +265,4 @@ class _GradientButton extends StatelessWidget {
   }
 }
 
-// Simple placeholder pages
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Log In")),
-      body: const Center(
-        child: Text("Login Page UI will be here"),
-      ),
-    );
-  }
-}
-
-class SignUpPage extends StatelessWidget {
-  const SignUpPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Sign Up")),
-      body: const Center(
-        child: Text("Sign Up Page UI will be here"),
-      ),
-    );
-  }
-}
