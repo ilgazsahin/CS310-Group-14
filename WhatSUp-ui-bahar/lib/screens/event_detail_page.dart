@@ -125,7 +125,7 @@ class EventDetailPage extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   final String text;
-  const _SectionTitle(this.text, {super.key});
+  const _SectionTitle(this.text);
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +143,7 @@ class _SectionTitle extends StatelessWidget {
 // Poster area
 class _PosterArea extends StatelessWidget {
   final String title;
-  const _PosterArea({required this.title, super.key});
+  const _PosterArea({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +225,7 @@ class _PosterArea extends StatelessWidget {
 
 // Price / Date / Time
 class _PriceDateTime extends StatelessWidget {
-  const _PriceDateTime({super.key});
+  const _PriceDateTime();
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +275,7 @@ class _PriceDateTime extends StatelessWidget {
 }
 
 class _DateTimeLabels extends StatelessWidget {
-  const _DateTimeLabels({super.key});
+  const _DateTimeLabels();
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +305,7 @@ class _DateTimeLabels extends StatelessWidget {
 }
 
 class _DateTimeValues extends StatelessWidget {
-  const _DateTimeValues({super.key});
+  const _DateTimeValues();
 
   @override
   Widget build(BuildContext context) {
@@ -370,7 +370,7 @@ class GlassBubble extends StatelessWidget {
 }
 
 class _AboutEventBubble extends StatelessWidget {
-  const _AboutEventBubble({super.key});
+  const _AboutEventBubble();
 
   @override
   Widget build(BuildContext context) {
@@ -389,7 +389,7 @@ class _AboutEventBubble extends StatelessWidget {
 }
 
 class _HostSection extends StatelessWidget {
-  const _HostSection({super.key});
+  const _HostSection();
 
   @override
   Widget build(BuildContext context) {
@@ -415,7 +415,7 @@ class _HostSection extends StatelessWidget {
 
 class _HostCircle extends StatelessWidget {
   final String label;
-  const _HostCircle({required this.label, super.key});
+  const _HostCircle({required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -445,7 +445,7 @@ class _HostCircle extends StatelessWidget {
 }
 
 class _LocationSection extends StatelessWidget {
-  const _LocationSection({super.key});
+  const _LocationSection();
 
   @override
   Widget build(BuildContext context) {
