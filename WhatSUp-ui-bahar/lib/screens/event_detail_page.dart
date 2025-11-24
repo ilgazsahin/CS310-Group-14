@@ -1,31 +1,25 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import '../models/data_models.dart'; // EventModel
 
 class EventDetailPage extends StatelessWidget {
-  const EventDetailPage({super.key});
+  final EventModel event;
+
+  const EventDetailPage({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
+
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // her zaman /home'a götüren custom back button
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              '/home',
-                  (route) => false, // bütün route stack'i temizle, home'u kök yap
-            );
-          },
-        ),
-        title: const Text(
-          "Event Details",
-          style: TextStyle(
+        leading: const BackButton(color: Colors.white),
+        title: Text(
+          event.title, // dynamic title
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -74,34 +68,28 @@ class EventDetailPage extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // WELCOMEPAGE İLE AYNI ARKA PLAN
+          // Background
           Container(
             decoration: const BoxDecoration(
               color: Color(0xFF594ABF),
             ),
           ),
 
-          // Blur daireler - WelcomePage’deki soft versiyonla aynı
+          // Blur circles
           Align(
-            alignment: const Alignment(0.8, 0.3),
-            child: Opacity(
-              opacity: 0.35,
-              child: _BlurCircle(
-                size: 230,
-                color: const Color(0xFFDD00FF),
-                blurSigma: 26,
-              ),
+            alignment: const Alignment(0.65, 0.55),
+            child: _BlurCircle(
+              size: 215,
+              color: const Color(0xFFDD00FF),
+              blurSigma: 40,
             ),
           ),
           Align(
-            alignment: const Alignment(-0.6, 0.7),
-            child: Opacity(
-              opacity: 0.30,
-              child: _BlurCircle(
-                size: 260,
-                color: const Color(0xFF9EFFEF),
-                blurSigma: 26,
-              ),
+            alignment: const Alignment(-0.1, 0.60),
+            child: _BlurCircle(
+              size: 215,
+              color: const Color(0xFF9EFFEF),
+              blurSigma: 40,
             ),
           ),
 
@@ -115,25 +103,29 @@ class EventDetailPage extends StatelessWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: const [
-                _PosterArea(title: "EVENT TITLE"),
-                SizedBox(height: 24),
-                _PriceDateTime(),
-                SizedBox(height: 24),
+              children: [
+                _PosterArea(
+                  title: event.title,
+                  imageUrl: event.imageUrl,
+                ),
+                const SizedBox(height: 24),
 
-                _SectionTitle("About Event"),
-                SizedBox(height: 8),
-                _AboutEventBubble(),
-                SizedBox(height: 24),
+                _PriceDateTime(eventDate: event.date),
+                const SizedBox(height: 24),
 
-                _SectionTitle("Host"),
-                SizedBox(height: 8),
-                _HostSection(),
-                SizedBox(height: 24),
+                const _SectionTitle("About Event"),
+                const SizedBox(height: 8),
+                const _AboutEventBubble(),
+                const SizedBox(height: 24),
 
-                _SectionTitle("Location"),
-                SizedBox(height: 8),
-                _LocationSection(),
+                const _SectionTitle("Host"),
+                const SizedBox(height: 8),
+                _HostSection(hostName: event.host),
+                const SizedBox(height: 24),
+
+                const _SectionTitle("Location"),
+                const SizedBox(height: 8),
+                _LocationSection(location: event.location),
               ],
             ),
           ),
@@ -163,7 +155,12 @@ class _SectionTitle extends StatelessWidget {
 // Poster area
 class _PosterArea extends StatelessWidget {
   final String title;
-  const _PosterArea({required this.title});
+  final String imageUrl;
+
+  const _PosterArea({
+    required this.title,
+    required this.imageUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -180,19 +177,15 @@ class _PosterArea extends StatelessWidget {
         height: 260,
         child: Stack(
           children: [
-            Container(
-              color: Colors.grey.shade300,
-              child: const Center(
-                child: Text(
-                  "Poster will be here",
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+            // Poster image from event
+            Image.network(
+              imageUrl,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
             ),
+
+            // Glassy gradient overlay at bottom
             Positioned(
               bottom: 0,
               left: 0,
@@ -203,9 +196,9 @@ class _PosterArea extends StatelessWidget {
                   bottomRight: Radius.circular(radius),
                 ),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                   child: Container(
-                    height: 110,
+                    height: 70,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
@@ -221,6 +214,8 @@ class _PosterArea extends StatelessWidget {
                 ),
               ),
             ),
+
+            // Title over poster
             Positioned(
               bottom: 22,
               left: 16,
@@ -245,10 +240,17 @@ class _PosterArea extends StatelessWidget {
 
 // Price / Date / Time
 class _PriceDateTime extends StatelessWidget {
-  const _PriceDateTime();
+  final String eventDate;
+
+  const _PriceDateTime({required this.eventDate});
 
   @override
   Widget build(BuildContext context) {
+    // Expecting format: "27 September 2025 - 11:00"
+    final parts = eventDate.split(' - ');
+    final dateText = parts.isNotEmpty ? parts[0] : eventDate;
+    final timeText = parts.length > 1 ? parts[1] : '';
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       child: Row(
@@ -282,9 +284,12 @@ class _PriceDateTime extends StatelessWidget {
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                _DateTimeLabels(),
-                _DateTimeValues(),
+              children: [
+                const _DateTimeLabels(),
+                _DateTimeValues(
+                  date: dateText,
+                  time: timeText,
+                ),
               ],
             ),
           ),
@@ -325,25 +330,31 @@ class _DateTimeLabels extends StatelessWidget {
 }
 
 class _DateTimeValues extends StatelessWidget {
-  const _DateTimeValues();
+  final String date;
+  final String time;
+
+  const _DateTimeValues({
+    required this.date,
+    required this.time,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
-      children: const [
+      children: [
         Text(
-          "DD.MM.YYYY",
-          style: TextStyle(
+          date,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
-          "HH:MM",
-          style: TextStyle(
+          time,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -408,16 +419,14 @@ class _AboutEventBubble extends StatelessWidget {
   }
 }
 
+// Host section using event.host
 class _HostSection extends StatelessWidget {
-  const _HostSection();
+  final String hostName;
+
+  const _HostSection({required this.hostName});
 
   @override
   Widget build(BuildContext context) {
-    final hosts = const [
-      _HostCircle(label: "Host 1"),
-      _HostCircle(label: "Host 2"),
-    ];
-
     return Align(
       alignment: Alignment.centerLeft,
       child: GlassBubble(
@@ -425,57 +434,39 @@ class _HostSection extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ...hosts.expand((h) => [h, const SizedBox(width: 32)]),
-          ]..removeLast(),
+            const Icon(Icons.person, color: Colors.white),
+            const SizedBox(width: 12),
+            Text(
+              hostName,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _HostCircle extends StatelessWidget {
-  final String label;
-  const _HostCircle({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withOpacity(0.35),
-          ),
-          child: const Icon(Icons.group, color: Colors.white, size: 26),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
+// Location section using event.location
 class _LocationSection extends StatelessWidget {
-  const _LocationSection();
+  final String location;
+
+  const _LocationSection({required this.location});
 
   @override
   Widget build(BuildContext context) {
-    return const GlassBubble(
+    return GlassBubble(
       child: SizedBox(
         height: 140,
         child: Center(
           child: Text(
-            "Map will be here",
-            style: TextStyle(
+            location,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 15,
               fontWeight: FontWeight.w600,
@@ -487,7 +478,7 @@ class _LocationSection extends StatelessWidget {
   }
 }
 
-// WelcomePage'deki ile aynı BlurCircle widget'ı
+// BlurCircle
 class _BlurCircle extends StatelessWidget {
   final double size;
   final Color color;

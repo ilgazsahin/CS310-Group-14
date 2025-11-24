@@ -121,26 +121,7 @@ class _WelcomePageState extends State<WelcomePage>
 
                     const SizedBox(height: 12),
 
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const EventDetailPage(),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        'Preview Event Detail (dev only)',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
 
-                    const SizedBox(height: 24),
                   ],
                 ),
               ),

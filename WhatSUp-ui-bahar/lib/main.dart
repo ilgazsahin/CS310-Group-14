@@ -17,6 +17,8 @@ import 'screens/login_page.dart';
 import 'screens/signup_page.dart';
 import 'screens/settings_page.dart';
 
+import 'models/data_models.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -42,7 +44,10 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignUpPage(),
         '/create-event': (context) => const CreateEventPage(),
         '/favorites': (context) => const FavoriteEventsPage(),
-        '/event-detail': (context) => const EventDetailPage(),
+        '/event-detail': (context) {
+          final event = ModalRoute.of(context)!.settings.arguments as EventModel;
+          return EventDetailPage(event: event);
+        },
         '/profile': (context) => const ProfileScreen(),
         '/my_listings': (context) => const MyListingsScreen(),
         '/home': (context) => const HomeScreen(),
