@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../theme.dart';
 
 class CreateEventPage extends StatefulWidget {
@@ -15,8 +18,16 @@ class _CreateEventPageState extends State<CreateEventPage> {
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _hostController = TextEditingController();
   final _ticketPriceController = TextEditingController();
+
+  // multiple host controllers
+  final List<TextEditingController> _hostControllers = [
+    TextEditingController(),
+  ];
+
+  // image picker + selected image
+  final ImagePicker _imagePicker =  ImagePicker();
+  File? _selectedImage;
 
   String? _selectedCategory;
 
@@ -26,8 +37,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
     _dateController.dispose();
     _timeController.dispose();
     _descriptionController.dispose();
-    _hostController.dispose();
     _ticketPriceController.dispose();
+
+    // dispose all host controllers
+    for (final c in _hostControllers) {
+      c.dispose();
+    }
+
     super.dispose();
   }
 
@@ -60,13 +76,107 @@ class _CreateEventPageState extends State<CreateEventPage> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final XFile? picked = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1200,
+      imageQuality: 85,
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedImage = File(picked.path);
+      });
+    }
+  }
+
   void _saveEvent() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Event saved (demo only)')),
+      final hosts = _hostControllers
+          .map((c) => c.text.trim())
+          .where((t) => t.isNotEmpty)
+          .toList();
+
+      // TODO: send hosts + _selectedImage + other data to backend if needed
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Event Created'),
+          content: const Text('Your event has been saved successfully.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // close dialog
+                Navigator.of(context).pop(); // go back to previous screen
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
       );
-      Navigator.pop(context);
     }
+  }
+
+  // builds a single host row; last row shows "+" to add, others show "-" to remove
+  Widget _buildHostRow(int index) {
+    final controller = _hostControllers[index];
+    final isLast = index == _hostControllers.length - 1;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 24,
+            backgroundColor: Colors.white,
+            child: Icon(Icons.person, size: 28),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              decoration: _inputDecoration('Host Name').copyWith(
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kCreatePurple,
+              foregroundColor: Colors.white,
+              shape: const CircleBorder(),
+              padding: const EdgeInsets.all(10),
+            ),
+            onPressed: () {
+              setState(() {
+                if (isLast) {
+                  // add new host
+                  _hostControllers.add(TextEditingController());
+                } else {
+                  // remove this host
+                  _hostControllers.removeAt(index).dispose();
+                }
+              });
+            },
+            child: Icon(isLast ? Icons.add : Icons.remove),
+          ),
+          const SizedBox(width: 4),
+          Text(isLast ? 'Add Host' : 'Remove'),
+        ],
+      ),
+    );
   }
 
   @override
@@ -87,41 +197,65 @@ class _CreateEventPageState extends State<CreateEventPage> {
           padding: const EdgeInsets.all(16),
           child: Form(
             key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Add image box
-                Container(
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: kCreatePurple,
-                          child: const Icon(Icons.add, color: Colors.white),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Add Image',
-                          style: TextStyle(
-                            color: Colors.black.withOpacity(0.7),
-                            fontWeight: FontWeight.w500,
-                          ),
+                // Add image box (now tappable)
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: _pickImage,
+                  child: Container(
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
                         ),
                       ],
+                    ),
+                    child: _selectedImage == null
+                        ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: kCreatePurple,
+                            child: const Icon(Icons.add,
+                                color: Colors.white),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Add Image',
+                            style: TextStyle(
+                              color: Colors.black.withOpacity(0.7),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Tap to choose from gallery',
+                            style: TextStyle(
+                              color: Colors.black.withOpacity(0.5),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                        : ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.file(
+                        _selectedImage!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
                     ),
                   ),
                 ),
@@ -150,8 +284,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
                               controller: _dateController,
                               readOnly: true,
                               onTap: _pickDate,
-                              decoration: _inputDecoration('DD/MM/YYYY')
-                                  .copyWith(
+                              decoration:
+                              _inputDecoration('DD/MM/YYYY').copyWith(
                                 suffixIcon: const Icon(Icons.calendar_today),
                               ),
                               validator: (value) =>
@@ -179,7 +313,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
                               ),
                               validator: (value) =>
                               (value == null || value.isEmpty)
-                                  ? 'Required' : null,
+                                  ? 'Required'
+                                  : null,
                             ),
                           ),
                         ],
@@ -203,49 +338,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 const SizedBox(height: 24),
 
                 const _SectionLabel(text: 'Host Info'),
-                Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.person, size: 28),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: _hostController,
-                          decoration: _inputDecoration('Host Name').copyWith(
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kCreatePurple,
-                          foregroundColor: Colors.white,
-                          shape: const CircleBorder(),
-                          padding: const EdgeInsets.all(10),
-                        ),
-                        onPressed: () {},
-                        child: const Icon(Icons.add),
-                      ),
-                      const SizedBox(width: 4),
-                      const Text('Add Host'),
-                    ],
+                Column(
+                  children: List.generate(
+                    _hostControllers.length,
+                        (index) => _buildHostRow(index),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -262,7 +358,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           _RoundedField(
                             child: DropdownButtonFormField<String>(
                               value: _selectedCategory,
-                              isExpanded: true, // avoid overflow
+                              isExpanded: true,
                               decoration: _inputDecoration('Select a Category')
                                   .copyWith(border: InputBorder.none),
                               items: const [
@@ -279,6 +375,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                   _selectedCategory = value;
                                 });
                               },
+                              validator: (value) =>
+                              (value == null || value.isEmpty)
+                                  ? 'Please select a category'
+                                  : null,
                             ),
                           ),
                         ],
@@ -293,7 +393,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                         children: [
                           const _SectionLabel(text: 'Ticket Price'),
                           _RoundedField(
-                            child: TextField(
+                            child: TextFormField(
                               controller: _ticketPriceController,
                               keyboardType:
                               const TextInputType.numberWithOptions(
@@ -304,6 +404,18 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                   child: Icon(Icons.currency_lira),
                                 ),
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return null; // optional
+                                }
+                                final normalized =
+                                value.replaceAll(',', '.').trim();
+                                final price = double.tryParse(normalized);
+                                if (price == null || price < 0) {
+                                  return 'Enter a valid price';
+                                }
+                                return null;
+                              },
                             ),
                           ),
                         ],
@@ -361,10 +473,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
   }
 
   InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
+    return const InputDecoration(
+      hintText: '',
       border: InputBorder.none,
-    );
+    ).copyWith(hintText: hint);
   }
 }
 
