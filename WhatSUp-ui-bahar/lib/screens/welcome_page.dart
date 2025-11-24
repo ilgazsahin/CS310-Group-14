@@ -61,21 +61,27 @@ class _WelcomePageState extends State<WelcomePage>
             ),
           ),
 
-          // Blur circles
+          // UPDATED: Softer, separated circles
           Align(
-            alignment: const Alignment(0.65, 0.55),
-            child: _BlurCircle(
-              size: 215,
-              color: const Color(0xFFDD00FF),
-              blurSigma: 40,
+            alignment: const Alignment(0.8, 0.3),
+            child: Opacity(
+              opacity: 0.35,
+              child: _BlurCircle(
+                size: 230,
+                color: const Color(0xFFDD00FF),
+                blurSigma: 26,
+              ),
             ),
           ),
           Align(
-            alignment: const Alignment(-0.1, 0.60),
-            child: _BlurCircle(
-              size: 215,
-              color: const Color(0xFF9EFFEF),
-              blurSigma: 40,
+            alignment: const Alignment(-0.6, 0.7),
+            child: Opacity(
+              opacity: 0.30,
+              child: _BlurCircle(
+                size: 260,
+                color: const Color(0xFF9EFFEF),
+                blurSigma: 26,
+              ),
             ),
           ),
 
@@ -170,7 +176,7 @@ class _EventDropCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // BUBBLE IMAGE (ssup2.png)
+          // BUBBLE IMAGE
           Container(
             width: 180,
             height: 120,

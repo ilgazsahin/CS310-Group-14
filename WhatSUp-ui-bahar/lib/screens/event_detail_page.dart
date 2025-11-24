@@ -12,7 +12,17 @@ class EventDetailPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const BackButton(color: Colors.white),
+        // her zaman /home'a götüren custom back button
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/home',
+                  (route) => false, // bütün route stack'i temizle, home'u kök yap
+            );
+          },
+        ),
         title: const Text(
           "Event Details",
           style: TextStyle(
@@ -71,21 +81,27 @@ class EventDetailPage extends StatelessWidget {
             ),
           ),
 
-          // Blur daireler (WelcomePage'dekiyle aynı)
+          // Blur daireler - WelcomePage’deki soft versiyonla aynı
           Align(
-            alignment: const Alignment(0.65, 0.55),
-            child: _BlurCircle(
-              size: 215,
-              color: const Color(0xFFDD00FF),
-              blurSigma: 40,
+            alignment: const Alignment(0.8, 0.3),
+            child: Opacity(
+              opacity: 0.35,
+              child: _BlurCircle(
+                size: 230,
+                color: const Color(0xFFDD00FF),
+                blurSigma: 26,
+              ),
             ),
           ),
           Align(
-            alignment: const Alignment(-0.1, 0.60),
-            child: _BlurCircle(
-              size: 215,
-              color: const Color(0xFF9EFFEF),
-              blurSigma: 40,
+            alignment: const Alignment(-0.6, 0.7),
+            child: Opacity(
+              opacity: 0.30,
+              child: _BlurCircle(
+                size: 260,
+                color: const Color(0xFF9EFFEF),
+                blurSigma: 26,
+              ),
             ),
           ),
 
