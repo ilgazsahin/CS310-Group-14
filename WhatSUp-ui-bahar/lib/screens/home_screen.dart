@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/data_models.dart';
 import '../utils/app_style.dart';
+import 'event_detail_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,28 +19,28 @@ class _HomeScreenState extends State<HomeScreen> {
       location: 'SuCool - Sabancı University',
       date: '2 December 2025 - 15.00',
       host: 'Mert Arıcan',
-      imageUrl: 'https://picsum.photos/id/100/200/200',
+      imageUrl: 'https://media.istockphoto.com/id/1323563761/tr/fotoğraf/satranç-oynamak.jpg?s=612x612&w=0&k=20&c=eXyLB4b3c3h7zE0vXrgAOQHEHIYyRmJBck-xTyx9mNs=',
     ),
     EventModel(
       title: 'Meeting With CEO',
       location: 'FASS - Sabancı University',
       date: '13 November 2025 - 17.30',
       host: 'Rana Eda Yurtsever',
-      imageUrl: 'https://picsum.photos/id/200/200/200',
+      imageUrl: 'https://us.images.westend61.de/0001918627pw/female-ceo-manager-leading-corporate-meeting-in-office-businesswoman-in-meeting-with-colleagues-in-conference-room-HPIF32327.jpg',
     ),
     EventModel(
       title: 'Campus Run',
       location: 'Sports Center',
       date: '15 November 2025 - 09.00',
       host: 'Sports Club',
-      imageUrl: 'https://picsum.photos/id/300/200/200',
+      imageUrl: 'https://penntoday.upenn.edu/sites/default/files/2019-02/P-100603-Master-V1-010X_0.jpg',
     ),
     EventModel(
       title: 'Midnight Study',
       location: 'IC - Information Center',
       date: '16 November 2025 - 23.00',
       host: 'Study Group',
-      imageUrl: 'https://picsum.photos/id/400/200/200',
+      imageUrl: 'https://miro.medium.com/v2/resize:fit:1400/0*ihNJJS8J84lepr4h.jpg',
     ),
   ];
 
@@ -56,8 +57,14 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined), label: 'Add'),
-          BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: 'Tickets'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box_outlined),
+            label: 'Add',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number),
+            label: 'Tickets',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         onTap: (index) {
@@ -81,19 +88,14 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
 
-
-      // GÖVDE (SCROLLABLE)
+      // BODY (SCROLLABLE)
       body: SingleChildScrollView(
         child: Column(
           children: [
             _buildCalendarHeader(),
-
             const SizedBox(height: 20),
-
             _buildCategoryTabs(),
-
             const SizedBox(height: 10),
-
             ListView.builder(
               padding: const EdgeInsets.all(16),
               shrinkWrap: true,
@@ -111,7 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCalendarHeader() {
     return Container(
-      padding: const EdgeInsets.only(top: 60, bottom: 20, left: 16, right: 16),
+      padding:
+      const EdgeInsets.only(top: 60, bottom: 20, left: 16, right: 16),
       decoration: const BoxDecoration(
         color: AppColors.calendarBg,
         borderRadius: BorderRadius.only(
@@ -124,15 +127,36 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
-              Text("November", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-              Text("2025", style: TextStyle(color: Colors.white, fontSize: 22)),
+              Text(
+                "November",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "2025",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-                .map((e) => Text(e, style: const TextStyle(color: Colors.white70, fontSize: 12)))
+                .map(
+                  (e) => Text(
+                e,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                ),
+              ),
+            )
                 .toList(),
           ),
           const SizedBox(height: 10),
@@ -156,15 +180,20 @@ class _HomeScreenState extends State<HomeScreen> {
               return Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: isFavorite || isSelected ? Border.all(color: Colors.white, width: 1.5) : null,
-                  color: isSelected ? Colors.white.withOpacity(0.2) : null,
+                  border: isFavorite || isSelected
+                      ? Border.all(color: Colors.white, width: 1.5)
+                      : null,
+                  color:
+                  isSelected ? Colors.white.withOpacity(0.2) : null,
                 ),
                 child: Center(
                   child: Text(
                     "$day",
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight: isFavorite ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isFavorite
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -194,7 +223,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 cat,
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight:
+                  isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected ? Colors.black : Colors.grey,
                 ),
               ),
@@ -212,58 +242,112 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Only this function changed: card is now tappable
   Widget _buildEventCard(EventModel event) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(event.imageUrl, width: 80, height: 80, fit: BoxFit.cover),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(event.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on, size: 14, color: AppColors.calendarBg),
-                      const SizedBox(width: 4),
-                      Expanded(child: Text(event.location, style: const TextStyle(fontSize: 12))),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Text(event.date, style: const TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.person, size: 14, color: AppColors.calendarBg),
-                      const SizedBox(width: 4),
-                      Text(event.host, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ],
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EventDetailPage(event: event),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  event.imageUrl,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 30),
-              child: Icon(Icons.favorite, color: AppColors.navBarBg),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: AppColors.calendarBg,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            event.location,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          event.date,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.person,
+                          size: 14,
+                          color: AppColors.calendarBg,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          event.host,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(top: 30),
+                child: Icon(
+                  Icons.favorite,
+                  color: AppColors.navBarBg,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
