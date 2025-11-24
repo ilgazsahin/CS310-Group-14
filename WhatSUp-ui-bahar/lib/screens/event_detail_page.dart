@@ -64,27 +64,31 @@ class EventDetailPage extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Gradient background
+          // WELCOMEPAGE İLE AYNI ARKA PLAN
           Container(
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF6A5AE0),
-                  Color(0xFFCE67C4),
-                  Color(0xFFF58CAF),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+              color: Color(0xFF594ABF),
             ),
           ),
-          // Blur overlay
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(
-              color: Colors.black.withOpacity(0.0),
+
+          // Blur daireler (WelcomePage'dekiyle aynı)
+          Align(
+            alignment: const Alignment(0.65, 0.55),
+            child: _BlurCircle(
+              size: 215,
+              color: const Color(0xFFDD00FF),
+              blurSigma: 40,
             ),
           ),
+          Align(
+            alignment: const Alignment(-0.1, 0.60),
+            child: _BlurCircle(
+              size: 215,
+              color: const Color(0xFF9EFFEF),
+              blurSigma: 40,
+            ),
+          ),
+
           // Content
           SingleChildScrollView(
             padding: const EdgeInsets.only(
@@ -461,6 +465,38 @@ class _LocationSection extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// WelcomePage'deki ile aynı BlurCircle widget'ı
+class _BlurCircle extends StatelessWidget {
+  final double size;
+  final Color color;
+  final double blurSigma;
+
+  const _BlurCircle({
+    super.key,
+    required this.size,
+    required this.color,
+    this.blurSigma = 40,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(
+        sigmaX: blurSigma,
+        sigmaY: blurSigma,
+      ),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
         ),
       ),
     );

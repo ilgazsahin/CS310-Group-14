@@ -21,23 +21,17 @@ class _WelcomePageState extends State<WelcomePage>
   void initState() {
     super.initState();
 
-    // Kısa bir pop-up animasyonu
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
 
-    // Şeffaftan görünür hale
     _fadeAnim = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOut,
     );
 
-    // AirDrop gibi hafif büyüyerek belirsin
-    _scaleAnim = Tween<double>(
-      begin: 0.8, // biraz küçük başlasın
-      end: 1.0,   // gerçek boyutuna gelsin
-    ).animate(
+    _scaleAnim = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeOutBack,
@@ -58,24 +52,16 @@ class _WelcomePageState extends State<WelcomePage>
     return Scaffold(
       body: Stack(
         children: [
-          // 1) Ana gradient arka plan
+          // BACKGROUND COLOR (#594ABF)
           Container(
             width: double.infinity,
             height: double.infinity,
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF6A5AE0),
-                  Color(0xFF8A62D5),
-                  Color(0xFFF58CAF),
-                ],
-              ),
+              color: Color(0xFF594ABF),
             ),
           ),
 
-          // 2) Blur daireler
+          // Blur circles
           Align(
             alignment: const Alignment(0.65, 0.55),
             child: _BlurCircle(
@@ -93,7 +79,6 @@ class _WelcomePageState extends State<WelcomePage>
             ),
           ),
 
-          // 3) İçerik
           SafeArea(
             child: Center(
               child: ConstrainedBox(
@@ -102,7 +87,6 @@ class _WelcomePageState extends State<WelcomePage>
                   children: [
                     const SizedBox(height: 60),
 
-                    // POP-UP EVENTDROP KARTI
                     FadeTransition(
                       opacity: _fadeAnim,
                       child: ScaleTransition(
@@ -113,7 +97,6 @@ class _WelcomePageState extends State<WelcomePage>
 
                     const Spacer(),
 
-                    // LOGIN
                     _GradientButton(
                       text: 'LOGIN',
                       onPressed: () {
@@ -123,7 +106,6 @@ class _WelcomePageState extends State<WelcomePage>
 
                     const SizedBox(height: 12),
 
-                    // SIGN UP
                     _GradientButton(
                       text: 'SIGN UP',
                       onPressed: () {
@@ -133,7 +115,6 @@ class _WelcomePageState extends State<WelcomePage>
 
                     const SizedBox(height: 12),
 
-                    // Sadece dev için event detail preview
                     TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -165,7 +146,7 @@ class _WelcomePageState extends State<WelcomePage>
   }
 }
 
-// ----------------- EventDrop Kartı -----------------
+// ----------------- EventDrop Card -----------------
 class _EventDropCard extends StatelessWidget {
   const _EventDropCard({super.key});
 
@@ -188,24 +169,25 @@ class _EventDropCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+
+          // BUBBLE IMAGE (ssup2.png)
           Container(
             width: 180,
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: Colors.transparent,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Center(
-              child: Text(
-                "'s up?",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
+            child: Center(
+              child: Image.asset(
+                'assets/images/ssup2.png',
+                fit: BoxFit.contain,
               ),
             ),
           ),
+
           const SizedBox(height: 16),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -296,7 +278,7 @@ class _GradientButton extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(50),
         border: Border.all(
-          color: Colors.white.withOpacity(0.22),
+          color: Colors.white24,
           width: 1,
         ),
         boxShadow: [
