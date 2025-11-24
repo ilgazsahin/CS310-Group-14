@@ -99,7 +99,9 @@ class ProfileScreen extends StatelessWidget {
                 }),
                 const SizedBox(height: 15),
 
-                _buildProfileButton(context, 'Settings', () {}),
+                _buildProfileButton(context, 'Settings', () {
+                  Navigator.pushNamed(context, '/settings');
+                }),
                 const SizedBox(height: 15),
 
 

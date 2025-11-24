@@ -15,7 +15,7 @@ import 'screens/search_screen.dart';
 import 'screens/tickets_page.dart';
 import 'screens/login_page.dart';
 import 'screens/signup_page.dart';
-
+import 'screens/settings_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -48,6 +48,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/search': (context) => const SearchScreen(),
         '/tickets': (context) => const TicketsPage(),
+        '/settings': (context) => const SettingsPage(),
       },
     );
   }
