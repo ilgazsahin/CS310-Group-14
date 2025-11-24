@@ -69,7 +69,6 @@ class _WelcomePageState extends State<WelcomePage>
                 colors: [
                   Color(0xFF6A5AE0),
                   Color(0xFF8A62D5),
-                  Color(0xFFCE67C4),
                   Color(0xFFF58CAF),
                 ],
               ),
@@ -118,12 +117,7 @@ class _WelcomePageState extends State<WelcomePage>
                     _GradientButton(
                       text: 'LOGIN',
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/login');
                       },
                     ),
 
@@ -133,12 +127,7 @@ class _WelcomePageState extends State<WelcomePage>
                     _GradientButton(
                       text: 'SIGN UP',
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignUpPage(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/signup');
                       },
                     ),
 

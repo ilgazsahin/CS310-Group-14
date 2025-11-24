@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'theme.dart';
+import 'screens/login_page.dart' as login;
+import 'screens/signup_page.dart' as signup;
 import 'screens/welcome_page.dart';
 import 'screens/event_detail_page.dart';
 import 'screens/create_event_page.dart';
