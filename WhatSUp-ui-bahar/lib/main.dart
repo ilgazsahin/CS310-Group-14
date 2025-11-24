@@ -11,6 +11,9 @@ import 'screens/my_listings_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/search_screen.dart';
 import 'screens/tickets_page.dart';
+import 'screens/login_page.dart';
+import 'screens/signup_page.dart';
+
 
 void main() {
   runApp(const MyApp());

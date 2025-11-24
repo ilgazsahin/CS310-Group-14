@@ -102,24 +102,37 @@ class ProfileScreen extends StatelessWidget {
                 _buildProfileButton(context, 'Settings', () {}),
                 const SizedBox(height: 15),
 
-                Container(
-                  width: double.infinity,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'LOG OUT []->',
-                      style: TextStyle(
-                        color: Color(0xFF900040),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+
+
+                InkWell(
+                  onTap: () {
+                    // tüm sayfa geçmişini silip WelcomePage'e dön
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/',              // main.dart'taki WelcomePage route'u
+                          (route) => false, // önceki tüm sayfaları sil
+                    );
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 55,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'LOG OUT []->',
+                        style: TextStyle(
+                          color: Color(0xFF900040),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                   ),
                 ),
+
               ],
             ),
           ),

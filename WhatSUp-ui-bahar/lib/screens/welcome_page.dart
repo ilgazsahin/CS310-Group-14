@@ -1,16 +1,64 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'event_detail_page.dart';
+import 'login_page.dart';
+import 'signup_page.dart';
 
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
+
+  @override
+  State<WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnim;
+  late Animation<double> _scaleAnim;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Kısa bir pop-up animasyonu
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    // Şeffaftan görünür hale
+    _fadeAnim = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    );
+
+    // AirDrop gibi hafif büyüyerek belirsin
+    _scaleAnim = Tween<double>(
+      begin: 0.8, // biraz küçük başlasın
+      end: 1.0,   // gerçek boyutuna gelsin
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOutBack,
+      ),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // 1) Main gradient background
+          // 1) Ana gradient arka plan
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -28,25 +76,25 @@ class WelcomePage extends StatelessWidget {
             ),
           ),
 
-          // 2) Blur circles
-          const Align(
-            alignment: Alignment(0.65, 0.55),
+          // 2) Blur daireler
+          Align(
+            alignment: const Alignment(0.65, 0.55),
             child: _BlurCircle(
               size: 215,
-              color: Color(0xFFDD00FF),
+              color: const Color(0xFFDD00FF),
               blurSigma: 40,
             ),
           ),
-          const Align(
-            alignment: Alignment(-0.1, 0.60),
+          Align(
+            alignment: const Alignment(-0.1, 0.60),
             child: _BlurCircle(
               size: 215,
-              color: Color(0xFF9EFFEF),
+              color: const Color(0xFF9EFFEF),
               blurSigma: 40,
             ),
           ),
 
-          // 3) Content (EventDrop + buttons)
+          // 3) İçerik
           SafeArea(
             child: Center(
               child: ConstrainedBox(
@@ -55,70 +103,12 @@ class WelcomePage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 60),
 
-                    // EventDrop card
-                    Container(
-                      width: 260,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.95),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Column(
-                        children: [
-                          const Text(
-                            "EventDrop",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            width: 180,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                "'s up?",
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              TextButton(
-                                onPressed: () {},
-                                child: const Text(
-                                  "Decline",
-                                  style: TextStyle(
-                                    color: Colors.red,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {},
-                                child: const Text(
-                                  "Accept",
-                                  style: TextStyle(
-                                    color: Colors.greenAccent,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                    // POP-UP EVENTDROP KARTI
+                    FadeTransition(
+                      opacity: _fadeAnim,
+                      child: ScaleTransition(
+                        scale: _scaleAnim,
+                        child: const _EventDropCard(),
                       ),
                     ),
 
@@ -154,7 +144,7 @@ class WelcomePage extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
-                    // Preview event detail
+                    // Sadece dev için event detail preview
                     TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -163,7 +153,6 @@ class WelcomePage extends StatelessWidget {
                             builder: (context) => const EventDetailPage(),
                           ),
                         );
-                        // or: Navigator.pushNamed(context, '/event-detail');
                       },
                       child: const Text(
                         'Preview Event Detail (dev only)',
@@ -187,6 +176,81 @@ class WelcomePage extends StatelessWidget {
   }
 }
 
+// ----------------- EventDrop Kartı -----------------
+class _EventDropCard extends StatelessWidget {
+  const _EventDropCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 260,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            "EventDrop",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: 180,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Center(
+              child: Text(
+                "'s up?",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              TextButton(
+                onPressed: () {},
+                child: const Text(
+                  "Decline",
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {},
+                child: const Text(
+                  "Accept",
+                  style: TextStyle(
+                    color: Colors.greenAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ----------------- Blur Circle -----------------
 class _BlurCircle extends StatelessWidget {
   final double size;
   final Color color;
@@ -218,6 +282,7 @@ class _BlurCircle extends StatelessWidget {
   }
 }
 
+// ----------------- Gradient Button -----------------
 class _GradientButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
@@ -270,35 +335,6 @@ class _GradientButton extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-      ),
-    );
-  }
-}
-
-// Simple placeholder pages
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Log In")),
-      body: const Center(
-        child: Text("Login Page UI will be here"),
-      ),
-    );
-  }
-}
-
-class SignUpPage extends StatelessWidget {
-  const SignUpPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Sign Up")),
-      body: const Center(
-        child: Text("Sign Up Page UI will be here"),
       ),
     );
   }

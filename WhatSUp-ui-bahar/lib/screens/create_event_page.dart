@@ -267,12 +267,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                   .copyWith(border: InputBorder.none),
                               items: const [
                                 DropdownMenuItem(
-                                    value: 'Workshop',
-                                    child: Text('Workshop')),
+                                    value: 'Academic',
+                                    child: Text('Academic')),
                                 DropdownMenuItem(
-                                    value: 'Party', child: Text('Party')),
+                                    value: 'Clubs', child: Text('Clubs')),
                                 DropdownMenuItem(
-                                    value: 'Sports', child: Text('Sports')),
+                                    value: 'Social', child: Text('Social')),
                               ],
                               onChanged: (value) {
                                 setState(() {
