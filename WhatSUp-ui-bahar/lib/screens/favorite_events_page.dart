@@ -3,39 +3,44 @@ import '../theme.dart';
 import 'event_detail_page.dart';
 import '../models/data_models.dart';
 
-class FavoriteEventsPage extends StatelessWidget {
+class FavoriteEventsPage extends StatefulWidget {
   const FavoriteEventsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Using EventModel from data_models.dart
-    final List<EventModel> events = [
-      EventModel(
-        title: 'Freshman Orientation',
-        location: 'Sabancı University Performance Center',
-        date: '27 September 2025 - 11:00',
-        host: 'Orientation Office',
-        imageUrl:
-        'https://images.pexels.com/photos/3182796/pexels-photo-3182796.jpeg',
-      ),
-      EventModel(
-        title: 'Career Talks',
-        location: 'FASS - Sabancı University',
-        date: '4 October 2025 - 20:00',
-        host: 'IEEE Student Branch',
-        imageUrl:
-        'https://images.pexels.com/photos/1181555/pexels-photo-1181555.jpeg',
-      ),
-      EventModel(
-        title: 'Tennis Tournament',
-        location: 'Sabancı University - Sports Center',
-        date: '10 October 2025 - 10:30',
-        host: 'Murat Yılmaz',
-        imageUrl:
-        'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg',
-      ),
-    ];
+  State<FavoriteEventsPage> createState() => _FavoriteEventsPageState();
+}
 
+class _FavoriteEventsPageState extends State<FavoriteEventsPage> {
+  // Using EventModel from data_models.dart
+  final List<EventModel> _events = [
+    EventModel(
+      title: 'Freshman Orientation',
+      location: 'Sabancı University Performance Center',
+      date: '27 September 2025 - 11:00',
+      host: 'Orientation Office',
+      imageUrl:
+      'https://images.pexels.com/photos/3182796/pexels-photo-3182796.jpeg',
+    ),
+    EventModel(
+      title: 'Career Talks',
+      location: 'FASS - Sabancı University',
+      date: '4 October 2025 - 20:00',
+      host: 'IEEE Student Branch',
+      imageUrl:
+      'https://images.pexels.com/photos/1181555/pexels-photo-1181555.jpeg',
+    ),
+    EventModel(
+      title: 'Tennis Tournament',
+      location: 'Sabancı University - Sports Center',
+      date: '10 October 2025 - 10:30',
+      host: 'Murat Yılmaz',
+      imageUrl:
+      'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kFavMaroon,
@@ -50,11 +55,19 @@ class FavoriteEventsPage extends StatelessWidget {
         color: const Color(0xFFF5F5F5),
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: events.length,
+          itemCount: _events.length,
           itemBuilder: (context, index) {
+            final event = _events[index];
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: EventCard(event: events[index]),
+              child: EventCard(
+                event: event,
+                onUnfavorite: () {
+                  setState(() {
+                    _events.removeAt(index); // 👈 remove from list
+                  });
+                },
+              ),
             );
           },
         ),
@@ -102,7 +115,13 @@ class FavoriteEventsPage extends StatelessWidget {
 
 class EventCard extends StatelessWidget {
   final EventModel event;
-  const EventCard({super.key, required this.event});
+  final VoidCallback onUnfavorite;
+
+  const EventCard({
+    super.key,
+    required this.event,
+    required this.onUnfavorite,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +191,7 @@ class EventCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            event.date, // from EventModel
+                            event.date,
                             style: const TextStyle(fontSize: 12),
                           ),
                         ),
@@ -196,7 +215,7 @@ class EventCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: onUnfavorite, // 👈 remove from favorites
                 icon: const Icon(Icons.favorite, color: kFavMaroon),
               ),
             ],
@@ -206,4 +225,3 @@ class EventCard extends StatelessWidget {
     );
   }
 }
-
