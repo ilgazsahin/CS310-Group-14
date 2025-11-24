@@ -273,18 +273,40 @@ class _TicketsPageState extends State<TicketsPage> {
                       ),
                     ),
                   ),
-                  // If you need a "Cancel ticket" button for requirements, enable this:
-                  /*
+                  // For the cancel ticket button
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton.icon(
-                      onPressed: () => _removeTicket(index),
+                      onPressed: () {
+                        // Optional: confirmation dialog
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Cancel ticket'),
+                            content: const Text(
+                                'Are you sure you want to remove this ticket?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('No'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context); // close dialog
+                                  _removeTicket(index);   // actually remove
+                                },
+                                child: const Text('Yes'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.delete_outline),
                       label: const Text('Cancel ticket'),
                     ),
                   ),
-                  */
+
                 ],
               ),
             ),
