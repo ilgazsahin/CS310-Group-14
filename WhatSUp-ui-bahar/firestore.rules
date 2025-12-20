@@ -12,9 +12,10 @@ service cloud.firestore {
         && request.resource.data.createdAt is timestamp;
       
       // Allow update: Only the creator can update their own events
+      // Ensures createdBy and createdAt cannot be changed, but allows updatedAt
       allow update: if request.auth != null
         && resource.data.createdBy == request.auth.uid
-        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.createdAt == resource.data.createdAt;
       
       // Allow delete: Only the creator can delete their own events

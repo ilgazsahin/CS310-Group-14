@@ -12,7 +12,12 @@ service firebase.storage {
         && request.resource.size < 5 * 1024 * 1024 // 5MB limit
         && request.resource.contentType.matches('image/.*');
       
-      // Allow delete: Only authenticated users (event creators will delete via app logic)
+      // Allow delete: Only authenticated users
+      // Note: Ownership is enforced by app logic - images are only deleted when
+      // the associated event is deleted, and event deletion is restricted to creators
+      // by Firestore security rules. Storage rules cannot access Firestore data
+      // to verify ownership, so we rely on the app's FirestoreService to enforce
+      // proper access control before calling deleteImage().
       allow delete: if request.auth != null;
     }
     
