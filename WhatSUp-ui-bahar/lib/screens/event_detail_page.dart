@@ -4,19 +4,90 @@ import '../theme.dart';
 import '../models/data_models.dart';
 import '../services/firestore_service.dart';
 
-class EventDetailPage extends StatelessWidget {
+class EventDetailPage extends StatefulWidget {
   final EventModel event;
+
+  const EventDetailPage({super.key, required this.event});
+
+  @override
+  State<EventDetailPage> createState() => _EventDetailPageState();
+}
+
+class _EventDetailPageState extends State<EventDetailPage> {
   final FirestoreService _firestoreService = FirestoreService();
+  bool _hasTicket = false;
+  bool _isCheckingTicket = true;
+  bool _isCreatingTicket = false;
 
-  EventDetailPage({super.key, required this.event});
+  @override
+  void initState() {
+    super.initState();
+    _checkTicketStatus();
+  }
 
-  void _showDeleteDialog(BuildContext context) {
+  Future<void> _checkTicketStatus() async {
+    if (widget.event.id != null) {
+      try {
+        final hasTicket = await _firestoreService.userHasTicket(widget.event.id!);
+        if (mounted) {
+          setState(() {
+            _hasTicket = hasTicket;
+            _isCheckingTicket = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isCheckingTicket = false;
+          });
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _isCheckingTicket = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleGetTicket() async {
+    setState(() => _isCreatingTicket = true);
+
+    try {
+      await _firestoreService.createTicket(widget.event);
+      if (mounted) {
+        setState(() {
+          _hasTicket = true;
+          _isCreatingTicket = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ticket created successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isCreatingTicket = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create ticket: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showDeleteDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Event'),
         content: Text(
-          'Are you sure you want to delete "${event.title}"? This action cannot be undone.',
+          'Are you sure you want to delete "${widget.event.title}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
@@ -26,9 +97,9 @@ class EventDetailPage extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              if (event.id != null) {
+              if (widget.event.id != null) {
                 try {
-                  await _firestoreService.deleteEvent(event.id!);
+                  await _firestoreService.deleteEvent(widget.event.id!);
                   if (context.mounted) {
                     Navigator.pop(context); // Go back to previous screen
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -69,18 +140,18 @@ class EventDetailPage extends StatelessWidget {
         elevation: 0,
         leading: const BackButton(color: Colors.white),
         title: Text(
-          event.title, // dynamic title
+          widget.event.title, // dynamic title
           style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
         ),
-        actions: _firestoreService.canUserModifyEvent(event)
+        actions: _firestoreService.canUserModifyEvent(widget.event)
             ? [
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.white),
-                  onPressed: () => _showDeleteDialog(context),
+                  onPressed: () => _showDeleteDialog(),
                 ),
               ]
             : null,
@@ -159,29 +230,38 @@ class EventDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _PosterArea(title: event.title, imageUrl: event.imageUrl ?? ''),
+                _PosterArea(title: widget.event.title, imageUrl: widget.event.imageUrl ?? ''),
                 const SizedBox(height: 24),
 
                 _PriceDateTime(
-                  eventDate: event.date,
-                  eventTime: event.time,
-                  ticketPrice: event.ticketPrice,
+                  eventDate: widget.event.date,
+                  eventTime: widget.event.time,
+                  ticketPrice: widget.event.ticketPrice,
                 ),
                 const SizedBox(height: 24),
 
                 const _SectionTitle("About Event"),
                 const SizedBox(height: 8),
-                _AboutEventBubble(description: event.description),
+                _AboutEventBubble(description: widget.event.description),
                 const SizedBox(height: 24),
 
                 const _SectionTitle("Host"),
                 const SizedBox(height: 8),
-                _HostSection(hosts: event.hosts),
+                _HostSection(hosts: widget.event.hosts),
                 const SizedBox(height: 24),
 
                 const _SectionTitle("Location"),
                 const SizedBox(height: 8),
-                _LocationSection(location: event.location),
+                _LocationSection(location: widget.event.location),
+                const SizedBox(height: 32),
+
+                // Get Ticket Button
+                if (!_isCheckingTicket)
+                  _GetTicketButton(
+                    hasTicket: _hasTicket,
+                    isCreating: _isCreatingTicket,
+                    onPressed: _hasTicket ? null : _handleGetTicket,
+                  ),
               ],
             ),
           ),
@@ -610,6 +690,78 @@ class _BlurCircle extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       ),
+    );
+  }
+}
+
+class _GetTicketButton extends StatelessWidget {
+  final bool hasTicket;
+  final bool isCreating;
+  final VoidCallback? onPressed;
+
+  const _GetTicketButton({
+    required this.hasTicket,
+    required this.isCreating,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassBubble(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: hasTicket
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.check_circle, color: Color(0xFF44F641), size: 24),
+                SizedBox(width: 12),
+                Text(
+                  'You have a ticket for this event',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            )
+          : SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: isCreating ? null : onPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF44F641),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: isCreating
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.confirmation_number, size: 24),
+                          SizedBox(width: 8),
+                          Text(
+                            'Get Ticket',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
     );
   }
 }

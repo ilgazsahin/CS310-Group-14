@@ -195,4 +195,141 @@ class FirestoreService {
     if (user == null) return false;
     return event.createdBy == user.uid;
   }
+
+  // ========== TICKET OPERATIONS ==========
+
+  // Collection reference for tickets
+  CollectionReference get _ticketsCollection => _firestore.collection('tickets');
+
+  /// CREATE: Create a ticket for an event
+  Future<String> createTicket(EventModel event) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to create tickets';
+      }
+
+      if (event.id == null) {
+        throw 'Event ID is required to create a ticket';
+      }
+
+      // Check if user already has a ticket for this event
+      final existingTickets = await _ticketsCollection
+          .where('userId', isEqualTo: user.uid)
+          .where('eventId', isEqualTo: event.id)
+          .get();
+
+      if (existingTickets.docs.isNotEmpty) {
+        throw 'You already have a ticket for this event';
+      }
+
+      // Create ticket with denormalized event data
+      final ticket = TicketModel(
+        eventId: event.id!,
+        eventTitle: event.title,
+        eventLocation: event.location,
+        eventDate: event.date,
+        eventTime: event.time,
+        eventImageUrl: event.imageUrl,
+        eventCategory: event.category,
+        eventHosts: event.hosts,
+        ticketPrice: event.ticketPrice,
+        userId: user.uid,
+        createdAt: DateTime.now(),
+        isFavorite: false,
+      );
+
+      final ticketData = ticket.toFirestore();
+      final docRef = await _ticketsCollection.add(ticketData);
+      return docRef.id;
+    } catch (e) {
+      throw 'Failed to create ticket: ${e.toString()}';
+    }
+  }
+
+  /// READ: Get all tickets for current user (real-time stream)
+  Stream<List<TicketModel>> getUserTicketsStream() {
+    final user = _authService.currentUser;
+    if (user == null) {
+      return Stream.value([]);
+    }
+
+    return _ticketsCollection
+        .where('userId', isEqualTo: user.uid)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => TicketModel.fromFirestore(doc))
+              .toList();
+        });
+  }
+
+  /// READ: Check if user has a ticket for an event
+  Future<bool> userHasTicket(String eventId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) return false;
+
+      final tickets = await _ticketsCollection
+          .where('userId', isEqualTo: user.uid)
+          .where('eventId', isEqualTo: eventId)
+          .limit(1)
+          .get();
+
+      return tickets.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// UPDATE: Toggle favorite status of a ticket
+  Future<void> toggleTicketFavorite(String ticketId, bool isFavorite) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to update tickets';
+      }
+
+      // Verify ownership
+      final ticketDoc = await _ticketsCollection.doc(ticketId).get();
+      if (!ticketDoc.exists) {
+        throw 'Ticket not found';
+      }
+
+      final ticketData = ticketDoc.data() as Map<String, dynamic>;
+      if (ticketData['userId'] != user.uid) {
+        throw 'You can only update your own tickets';
+      }
+
+      await _ticketsCollection.doc(ticketId).update({'isFavorite': isFavorite});
+    } catch (e) {
+      throw 'Failed to update ticket: ${e.toString()}';
+    }
+  }
+
+  /// DELETE: Delete a ticket
+  Future<void> deleteTicket(String ticketId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to delete tickets';
+      }
+
+      // Verify ownership
+      final ticketDoc = await _ticketsCollection.doc(ticketId).get();
+      if (!ticketDoc.exists) {
+        throw 'Ticket not found';
+      }
+
+      final ticketData = ticketDoc.data() as Map<String, dynamic>;
+      if (ticketData['userId'] != user.uid) {
+        throw 'You can only delete your own tickets';
+      }
+
+      await _ticketsCollection.doc(ticketId).delete();
+    } catch (e) {
+      throw 'Failed to delete ticket: ${e.toString()}';
+    }
+  }
 }

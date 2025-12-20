@@ -22,6 +22,28 @@ service cloud.firestore {
       allow delete: if request.auth != null
         && resource.data.createdBy == request.auth.uid;
     }
+
+    // Tickets collection rules
+    match /tickets/{ticketId} {
+      // Allow read: Users can only read their own tickets
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      
+      // Allow create: Only authenticated users can create tickets for themselves
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.createdAt is timestamp;
+      
+      // Allow update: Users can only update their own tickets (e.g., favorite status)
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.eventId == resource.data.eventId; // Prevent changing eventId
+      
+      // Allow delete: Users can only delete their own tickets
+      allow delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
     
     // Default: Deny all other access
     match /{document=**} {

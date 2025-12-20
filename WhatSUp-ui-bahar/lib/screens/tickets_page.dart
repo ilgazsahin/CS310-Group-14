@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import '../models/data_models.dart';
+import '../services/firestore_service.dart';
 
 class TicketsPage extends StatefulWidget {
   const TicketsPage({super.key});
@@ -11,15 +13,7 @@ class TicketsPage extends StatefulWidget {
 class _TicketsPageState extends State<TicketsPage> {
   // Bottom nav index: 0 = Home, 1 = Search, 2 = Add, 3 = Tickets, 4 = Profile
   int _selectedIndex = 3;
-
-  late List<Ticket> _tickets;
-
-  @override
-  void initState() {
-    super.initState();
-    // Copy initial tickets so we can mutate this list locally
-    _tickets = List<Ticket>.from(initialTickets);
-  }
+  final FirestoreService _firestoreService = FirestoreService();
 
   void _onBottomNavTapped(int index) {
     if (index == _selectedIndex) return;
@@ -47,19 +41,49 @@ class _TicketsPageState extends State<TicketsPage> {
     }
   }
 
-  void _toggleFavorite(int index) {
-    setState(() {
-      final ticket = _tickets[index];
-      _tickets[index] =
-          ticket.copyWith(isFavorite: !ticket.isFavorite); // immutable update
-    });
+  Future<void> _toggleFavorite(TicketModel ticket) async {
+    try {
+      if (ticket.id != null) {
+        await _firestoreService.toggleTicketFavorite(
+          ticket.id!,
+          !ticket.isFavorite,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update favorite: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  // if we later want a "Cancel ticket" option, we can use this
-  void _removeTicket(int index) {
-    setState(() {
-      _tickets.removeAt(index);
-    });
+  Future<void> _removeTicket(TicketModel ticket) async {
+    try {
+      if (ticket.id != null) {
+        await _firestoreService.deleteTicket(ticket.id!);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Ticket cancelled successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to cancel ticket: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -79,21 +103,55 @@ class _TicketsPageState extends State<TicketsPage> {
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
-      body: _tickets.isEmpty
-          ? const Center(
-        child: Text(
-          "You don't have any tickets yet.",
-          style: TextStyle(fontSize: 16),
-        ),
-      )
-          : ListView.separated(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        itemCount: _tickets.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final ticket = _tickets[index];
-          return _buildTicketCard(ticket, index);
+      body: StreamBuilder<List<TicketModel>>(
+        stream: _firestoreService.getUserTicketsStream(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error loading tickets: ${snapshot.error}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red, fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final tickets = snapshot.data ?? [];
+
+          if (tickets.isEmpty) {
+            return const Center(
+              child: Text(
+                "You don't have any tickets yet.",
+                style: TextStyle(fontSize: 16),
+              ),
+            );
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            itemCount: tickets.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final ticket = tickets[index];
+              return _buildTicketCard(ticket);
+            },
+          );
         },
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -131,7 +189,7 @@ class _TicketsPageState extends State<TicketsPage> {
     );
   }
 
-  Widget _buildTicketCard(Ticket ticket, int index) {
+  Widget _buildTicketCard(TicketModel ticket) {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -148,10 +206,21 @@ class _TicketsPageState extends State<TicketsPage> {
               child: SizedBox(
                 width: 70,
                 height: 70,
-                child: Image.network(
-                  ticket.imageUrl,
-                  fit: BoxFit.cover,
-                ),
+                child: ticket.eventImageUrl != null && ticket.eventImageUrl!.isNotEmpty
+                    ? Image.network(
+                        ticket.eventImageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.event, size: 40),
+                          );
+                        },
+                      )
+                    : Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.event, size: 40),
+                      ),
               ),
             ),
             const SizedBox(width: 12),
@@ -166,7 +235,7 @@ class _TicketsPageState extends State<TicketsPage> {
                     children: [
                       Expanded(
                         child: Text(
-                          ticket.title,
+                          ticket.eventTitle,
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
@@ -180,7 +249,7 @@ class _TicketsPageState extends State<TicketsPage> {
                               : Icons.favorite_border,
                           color: ticket.isFavorite ? kFavMaroon : null,
                         ),
-                        onPressed: () => _toggleFavorite(index),
+                        onPressed: () => _toggleFavorite(ticket),
                         tooltip: ticket.isFavorite
                             ? 'Remove from favorites'
                             : 'Add to favorites',
@@ -199,7 +268,7 @@ class _TicketsPageState extends State<TicketsPage> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          ticket.location,
+                          ticket.eventLocation,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey[700],
@@ -294,7 +363,7 @@ class _TicketsPageState extends State<TicketsPage> {
                               TextButton(
                                 onPressed: () {
                                   Navigator.pop(context); // close dialog
-                                  _removeTicket(index);   // actually remove
+                                  _removeTicket(ticket);   // actually remove
                                 },
                                 child: const Text('Yes'),
                               ),
@@ -317,104 +386,3 @@ class _TicketsPageState extends State<TicketsPage> {
   }
 }
 
-/// Simple model for tickets on this page.
-class Ticket {
-  final String title;
-  final String location;
-  final String dateTime;
-  final String organizer;
-  final TicketCategory category;
-  final String imageUrl;
-  final bool isFavorite; // new field
-
-  const Ticket({
-    required this.title,
-    required this.location,
-    required this.dateTime,
-    required this.organizer,
-    required this.category,
-    required this.imageUrl,
-    this.isFavorite = false, // default so old sample data still compiles
-  });
-
-  Ticket copyWith({
-    String? title,
-    String? location,
-    String? dateTime,
-    String? organizer,
-    TicketCategory? category,
-    String? imageUrl,
-    bool? isFavorite,
-  }) {
-    return Ticket(
-      title: title ?? this.title,
-      location: location ?? this.location,
-      dateTime: dateTime ?? this.dateTime,
-      organizer: organizer ?? this.organizer,
-      category: category ?? this.category,
-      imageUrl: imageUrl ?? this.imageUrl,
-      isFavorite: isFavorite ?? this.isFavorite,
-    );
-  }
-
-  String get categoryLabel {
-    switch (category) {
-      case TicketCategory.academic:
-        return 'academic';
-      case TicketCategory.clubs:
-        return 'clubs';
-    }
-  }
-
-  Color get categoryColor {
-    switch (category) {
-      case TicketCategory.academic:
-        return kCreatePurple;
-      case TicketCategory.clubs:
-        return Colors.green;
-    }
-  }
-}
-
-enum TicketCategory { academic, clubs }
-
-// Sample tickets adapted to the new model; they all start with isFavorite = false.
-// Sample models use placeholder images which may not be relevant to the event for now. This will fix when /images folder is implemented.
-const List<Ticket> initialTickets = [
-  Ticket(
-    title: 'Freshman Orientation',
-    location: 'Sabancı University Performance Center',
-    dateTime: '27 September 2025 · 14:00',
-    organizer: 'Student Resources',
-    category: TicketCategory.academic,
-    imageUrl:
-    'https://images.pexels.com/photos/1181400/pexels-photo-1181400.jpeg?auto=compress&cs=tinysrgb&w=800',
-  ),
-  Ticket(
-    title: 'Career Talks',
-    location: 'FASS G052',
-    dateTime: '4 October 2025 · 15:00',
-    organizer: 'IES',
-    category: TicketCategory.academic,
-    imageUrl:
-    'https://images.pexels.com/photos/1181567/pexels-photo-1181567.jpeg?auto=compress&cs=tinysrgb&w=800',
-  ),
-  Ticket(
-    title: 'Basketball Tournament',
-    location: 'Sabancı University Sports Center',
-    dateTime: '10 October 2025 · 16:30',
-    organizer: 'Sports Club',
-    category: TicketCategory.clubs,
-    imageUrl:
-    'https://www.secsports.com/imgproxy/zIXmm0sfOOiSX42VjM_P7d0A64oGOkV0uBY1G-vFkrM/rs:fit:1980:0:0:g:ce/aHR0cHM6Ly9zdG9yYWdlLmdvb2dsZWFwaXMuY29tL3NlY3Nwb3J0cy1wcm9kL3VwbG9hZC8yMDI0LzAxLzMxLzQ5MTYyMTUxLWI0ZjQtNDhkNC1hMGJlLWU4YjhjNDNhMWNmNi5qcGc.jpg',
-  ),
-  Ticket(
-    title: 'Halloween Party',
-    location: 'Sabancı University Lake',
-    dateTime: '31 October 2025 · 22:00',
-    organizer: 'Student Council',
-    category: TicketCategory.clubs,
-    imageUrl:
-    'https://images.pexels.com/photos/6194201/pexels-photo-6194201.jpeg?auto=compress&cs=tinysrgb&w=800',
-  ),
-];
