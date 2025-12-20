@@ -247,7 +247,11 @@ class ProfileScreen extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(text, style: AppTextStyles.buttonText),
+            Text(text, style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            )),
             const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.accentGreen),
           ],
         ),

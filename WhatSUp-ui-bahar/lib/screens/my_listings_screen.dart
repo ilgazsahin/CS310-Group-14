@@ -119,7 +119,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
           final events = snapshot.data ?? [];
 
           if (events.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'You haven\'t created any events yet',
                 style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6)),
