@@ -153,8 +153,8 @@ class SearchScreen extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(post.username, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text(post.caption, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text(post.username, style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color)),
+                    Text(post.caption, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6))),
                   ],
                 ),
               ],

@@ -374,7 +374,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontSize: 16,
                   fontWeight:
                   isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.black : Colors.grey,
+                  color: isSelected 
+                      ? Theme.of(context).textTheme.bodyLarge?.color 
+                      : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
                 ),
               ),
               if (isSelected)

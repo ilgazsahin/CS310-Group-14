@@ -336,7 +336,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -364,7 +364,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           'Name',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -398,7 +398,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           'SU Email',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -476,7 +476,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -504,7 +504,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           'Current Password',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -536,7 +536,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           'New Password',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -571,7 +571,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           'Confirm New Password',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -643,7 +643,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -708,7 +708,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -748,7 +748,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     'Get notified before events',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: Colors.grey[600],
+                                      color: Theme.of(context).textTheme.bodySmall?.color,
                                     ),
                                   ),
                                 ],
@@ -781,7 +781,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           _reminderTime,
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                           ),
                         ),
                         trailing: const Icon(
@@ -802,7 +802,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -912,7 +912,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                       letterSpacing: 0.5,
                     ),
                   ),

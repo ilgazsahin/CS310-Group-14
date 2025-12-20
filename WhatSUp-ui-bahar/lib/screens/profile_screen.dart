@@ -212,11 +212,11 @@ class ProfileScreen extends StatelessWidget {
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
                         'LOG OUT []->',
                         style: TextStyle(
-                          color: Color(0xFF900040),
+                          color: kFavMaroon,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),

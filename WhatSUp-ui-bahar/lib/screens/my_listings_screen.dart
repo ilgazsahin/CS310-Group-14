@@ -101,7 +101,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                         ? 'Firestore needs to create an index for this query.\n\nClick the link in the error message below to create it automatically, or go to:\nFirebase Console → Firestore → Indexes → Create Index'
                         : error,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color),
                     ),
                     if (isIndexError) ...[
                       const SizedBox(height: 16),
@@ -122,7 +122,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
             return const Center(
               child: Text(
                 'You haven\'t created any events yet',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6)),
               ),
             );
           }
