@@ -107,11 +107,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
                   itemCount: events.length,
-                  itemBuilder: (context, index) {
+              itemBuilder: (context, index) {
                     return _buildEventCard(events[index]);
                   },
                 );
@@ -282,9 +282,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: event.imageUrl != null && event.imageUrl!.isNotEmpty
                     ? Image.network(
                         event.imageUrl!,
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             width: 80,
@@ -299,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 80,
                         color: Colors.grey[300],
                         child: const Icon(Icons.event, size: 40),
-                      ),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(

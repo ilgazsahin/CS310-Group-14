@@ -55,6 +55,11 @@ class FirestoreService {
   /// READ: Get a single event by ID
   Future<EventModel?> getEvent(String eventId) async {
     try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to view events';
+      }
+
       final doc = await _eventsCollection.doc(eventId).get();
       if (doc.exists) {
         return EventModel.fromFirestore(doc);
@@ -67,6 +72,12 @@ class FirestoreService {
 
   /// READ: Get all events (real-time stream)
   Stream<List<EventModel>> getEventsStream() {
+    final user = _authService.currentUser;
+    if (user == null) {
+      // Return empty stream if user is not authenticated
+      return Stream.value([]);
+    }
+
     return _eventsCollection
         .orderBy('createdAt', descending: true)
         .snapshots()
@@ -74,11 +85,21 @@ class FirestoreService {
           return snapshot.docs
               .map((doc) => EventModel.fromFirestore(doc))
               .toList();
+        })
+        .handleError((error) {
+          print('Error in getEventsStream: $error');
+          throw error;
         });
   }
 
   /// READ: Get events by category (real-time stream)
   Stream<List<EventModel>> getEventsByCategoryStream(String category) {
+    final user = _authService.currentUser;
+    if (user == null) {
+      // Return empty stream if user is not authenticated
+      return Stream.value([]);
+    }
+
     return _eventsCollection
         .where('category', isEqualTo: category)
         .orderBy('createdAt', descending: true)
@@ -87,6 +108,10 @@ class FirestoreService {
           return snapshot.docs
               .map((doc) => EventModel.fromFirestore(doc))
               .toList();
+        })
+        .handleError((error) {
+          print('Error in getEventsByCategoryStream: $error');
+          throw error;
         });
   }
 

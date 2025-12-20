@@ -230,7 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _emailController.text = userEmail;
         }
         
-        return Scaffold(
+    return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: kCreatePurple,
@@ -469,7 +469,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     subtitle: Text(
                       _reminderTime,
                       style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                    ),
+                      ),
                     trailing: const Icon(
                       Icons.chevron_right,
                       color: Colors.grey,

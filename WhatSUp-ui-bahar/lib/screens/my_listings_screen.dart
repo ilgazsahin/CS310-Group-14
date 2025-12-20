@@ -4,6 +4,7 @@ import '../services/firestore_service.dart';
 import '../utils/app_styles.dart';
 import '../theme.dart';
 import 'event_detail_page.dart';
+import 'edit_event_page.dart';
 
 class MyListingsScreen extends StatefulWidget {
   const MyListingsScreen({super.key});
@@ -233,18 +234,30 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.accentGreen,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Row(
-                            children: [
-                              Text('Edit', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                              SizedBox(width: 4),
-                              Icon(Icons.edit, size: 12),
-                            ],
+                        GestureDetector(
+                          onTap: () {
+                            // Navigate to edit page - stop event propagation
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EditEventPage(event: event),
+                              ),
+                            );
+                          },
+                          behavior: HitTestBehavior.opaque, // Prevent tap from passing through
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.accentGreen,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              children: [
+                                Text('Edit', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                SizedBox(width: 4),
+                                Icon(Icons.edit, size: 12),
+                              ],
+                            ),
                           ),
                         ),
                       ],

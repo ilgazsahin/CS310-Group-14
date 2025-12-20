@@ -74,22 +74,22 @@ class _SignUpPageState extends State<SignUpPage> {
         // Extract the error message (it's already a user-friendly string from AuthService)
         final errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('Error: ', '');
         
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
             title: const Text('Sign Up Failed'),
             content: Text(
               errorMessage,
               style: const TextStyle(fontSize: 14),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
       }
     } finally {
       if (mounted) {
@@ -326,11 +326,11 @@ class _SignUpPageState extends State<SignUpPage> {
                                   )
                                 : const Text(
                                     'Sign Up',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),

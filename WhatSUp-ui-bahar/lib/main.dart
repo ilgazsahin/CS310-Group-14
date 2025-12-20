@@ -8,6 +8,7 @@ import 'widgets/auth_wrapper.dart';
 import 'providers/auth_provider.dart';
 import 'screens/event_detail_page.dart';
 import 'screens/create_event_page.dart';
+import 'screens/edit_event_page.dart';
 import 'screens/favorite_events_page.dart';
 import 'screens/profile_screen.dart';
 import 'screens/my_listings_screen.dart';
@@ -45,10 +46,14 @@ class MyApp extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const AuthWrapper(),
-          '/login': (context) => const LoginPage(),
-          '/signup': (context) => const SignUpPage(),
-          '/create-event': (context) => const CreateEventPage(),
-          '/favorites': (context) => const FavoriteEventsPage(),
+        '/login': (context) => const LoginPage(),
+        '/signup': (context) => const SignUpPage(),
+        '/create-event': (context) => const CreateEventPage(),
+        '/edit-event': (context) {
+          final event = ModalRoute.of(context)!.settings.arguments as EventModel;
+          return EditEventPage(event: event);
+        },
+        '/favorites': (context) => const FavoriteEventsPage(),
           '/event-detail': (context) {
             final event =
                 ModalRoute.of(context)!.settings.arguments as EventModel;

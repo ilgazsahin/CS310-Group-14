@@ -96,23 +96,23 @@ class AuthService {
       default:
         // Check if the error message contains keywords that indicate wrong password
         final errorMessage = e.message?.toLowerCase() ?? '';
-        if (errorMessage.contains('password') && 
-            (errorMessage.contains('incorrect') || 
-             errorMessage.contains('wrong') || 
-             errorMessage.contains('invalid') ||
-             errorMessage.contains('credential'))) {
+        if (errorMessage.contains('password') &&
+            (errorMessage.contains('incorrect') ||
+                errorMessage.contains('wrong') ||
+                errorMessage.contains('invalid') ||
+                errorMessage.contains('credential'))) {
           return 'Incorrect password. Please check your password and try again.';
         }
         // Check if it's a credential-related error
-        if (errorMessage.contains('credential') && 
-            (errorMessage.contains('incorrect') || 
-             errorMessage.contains('invalid') ||
-             errorMessage.contains('expired'))) {
+        if (errorMessage.contains('credential') &&
+            (errorMessage.contains('incorrect') ||
+                errorMessage.contains('invalid') ||
+                errorMessage.contains('expired'))) {
           return 'Incorrect email or password. Please check your credentials and try again.';
         }
         // Return the actual error message with code for debugging
-        return e.message ?? 'An authentication error occurred (${e.code}). Please try again.';
+        return e.message ??
+            'An authentication error occurred (${e.code}). Please try again.';
     }
   }
 }
-
