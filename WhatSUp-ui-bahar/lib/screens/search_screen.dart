@@ -39,7 +39,7 @@ class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppColors.navBarBg,
@@ -108,7 +108,7 @@ class SearchScreen extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _posts.length,
               itemBuilder: (context, index) {
-                return _buildPostCard(_posts[index]);
+                return _buildPostCard(context, _posts[index]);
               },
             ),
           ],
@@ -117,9 +117,9 @@ class SearchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPostCard(PostModel post) {
+  Widget _buildPostCard(BuildContext context, PostModel post) {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       margin: const EdgeInsets.only(bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

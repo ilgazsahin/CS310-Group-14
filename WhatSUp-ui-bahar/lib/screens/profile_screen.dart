@@ -209,7 +209,7 @@ class ProfileScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 55,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Center(
@@ -241,7 +241,7 @@ class ProfileScreen extends StatelessWidget {
         height: 55,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

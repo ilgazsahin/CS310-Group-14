@@ -27,7 +27,7 @@ class _FavoriteEventsPageState extends State<FavoriteEventsPage> {
         ),
       ),
       body: Container(
-        color: const Color(0xFFF5F5F5),
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: _events.isEmpty
             ? const Center(
                 child: Padding(

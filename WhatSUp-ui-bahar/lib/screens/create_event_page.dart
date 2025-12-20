@@ -333,7 +333,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
@@ -399,7 +399,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
         ),
       ),
       body: Container(
-        color: const Color(0xFFF5F5F5),
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Form(
@@ -417,7 +417,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                       child: Container(
                         height: 160,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
@@ -764,7 +764,7 @@ class _RoundedField extends StatelessWidget {
       height: height,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
