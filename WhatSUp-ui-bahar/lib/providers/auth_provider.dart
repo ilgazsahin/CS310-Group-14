@@ -72,5 +72,21 @@ class AuthProvider extends ChangeNotifier {
       rethrow;
     }
   }
+
+  /// Update password
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _authService.updatePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      // Password update doesn't change auth state, so no need to notify
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 

@@ -67,6 +67,42 @@ class AuthService {
     }
   }
 
+  /// Update user password
+  /// Requires re-authentication for security
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw 'You must be logged in to update your password.';
+      }
+
+      if (user.email == null) {
+        throw 'Email address not found. Cannot update password.';
+      }
+
+      // Re-authenticate user with current password
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+
+      // Update password
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      if (e is String) {
+        throw e;
+      }
+      throw 'Failed to update password: ${e.toString()}';
+    }
+  }
+
   /// Handle Firebase Auth exceptions and return user-friendly error messages
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {

@@ -139,9 +139,6 @@ class ProfileScreen extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 40),
-                _buildProfileButton(context, 'Edit My Profile', () {}),
-                const SizedBox(height: 15),
-
                 _buildProfileButton(context, 'Favorite Events', () {
                   Navigator.pushNamed(context, '/favorites');
                 }),
