@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -12,6 +14,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
   
   String? _validateName(String? value) {
     if (value == null || value.isEmpty) {
@@ -47,38 +50,51 @@ class _SignUpPageState extends State<SignUpPage> {
     return null;
   }
   
-  void _handleSignUp() {
-    if (_formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Success'),
-          content: const Text('Account created successfully!'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushReplacementNamed(context, '/home');
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
+  Future<void> _handleSignUp() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.signUp(
+        email: _emailController.text,
+        password: _passwordController.text,
       );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text('Please fix the errors in the form'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+      
+      // Success - navigation will be handled by AuthWrapper
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    } catch (e) {
+      // Show error message - the AuthService already provides user-friendly messages
+      if (mounted) {
+        // Extract the error message (it's already a user-friendly string from AuthService)
+        final errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('Error: ', '');
+        
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Sign Up Failed'),
+            content: Text(
+              errorMessage,
+              style: const TextStyle(fontSize: 14),
             ),
-          ],
-        ),
-      );
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
   
@@ -213,6 +229,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           controller: _emailController,
                           validator: _validateEmail,
                           keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autocorrect: false,
+                          enableSuggestions: false,
                           decoration: InputDecoration(
                             hintText: 'value',
                             filled: true,
@@ -224,6 +243,30 @@ class _SignUpPageState extends State<SignUpPage> {
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 14,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: const Text(
+                                '@',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF594ABF),
+                                ),
+                              ),
+                              onPressed: () {
+                                final currentText = _emailController.text;
+                                final selection = _emailController.selection;
+                                final newText = currentText.substring(0, selection.start) +
+                                    '@' +
+                                    currentText.substring(selection.end);
+                                _emailController.value = TextEditingValue(
+                                  text: newText,
+                                  selection: TextSelection.collapsed(
+                                    offset: selection.start + 1,
+                                  ),
+                                );
+                              },
+                              tooltip: 'Insert @ symbol',
                             ),
                           ),
                         ),
@@ -261,7 +304,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: _handleSignUp,
+                            onPressed: _isLoading ? null : _handleSignUp,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               foregroundColor: const Color(0xFF594ABF),
@@ -270,13 +313,24 @@ class _SignUpPageState extends State<SignUpPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: const Text(
-                              'Sign In',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Color(0xFF594ABF),
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Sign Up',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 16),

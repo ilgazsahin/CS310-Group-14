@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../theme.dart';
+import '../providers/auth_provider.dart';
 
 class SettingsPage extends StatefulWidget {
   static const String routeName = '/settings';
@@ -20,8 +22,37 @@ class _SettingsPageState extends State<SettingsPage> {
   final _formKey = GlobalKey<FormState>();
 
   // Controllers for text fields
-  final _nameController = TextEditingController(text: 'Efe Aslan');
-  final _emailController = TextEditingController(text: 'efe.aslan@sabanciuniv.edu');
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+
+  String _getDisplayName(String? email) {
+    if (email == null || email.isEmpty) return '';
+    // Extract name from email (e.g., "john.doe@sabanciuniv.edu" -> "John Doe")
+    final emailPrefix = email.split('@').first;
+    if (emailPrefix.isEmpty) return '';
+
+    final parts = emailPrefix.split('.');
+    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+      final firstName = parts[0].length > 1
+          ? '${parts[0][0].toUpperCase()}${parts[0].substring(1)}'
+          : parts[0].toUpperCase();
+      final lastName = parts[1].length > 1
+          ? '${parts[1][0].toUpperCase()}${parts[1].substring(1)}'
+          : parts[1].toUpperCase();
+      return '$firstName $lastName';
+    }
+    return emailPrefix.length > 1
+        ? emailPrefix[0].toUpperCase() + emailPrefix.substring(1)
+        : emailPrefix.toUpperCase();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Controllers will be initialized in build method using provider
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+  }
 
   @override
   void dispose() {
@@ -139,8 +170,8 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _handleSignOut() {
-    showDialog(
+  Future<void> _handleSignOut() async {
+    final confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -148,14 +179,11 @@ class _SettingsPageState extends State<SettingsPage> {
           content: const Text('Are you sure you want to sign out?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context, false),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-              },
+              onPressed: () => Navigator.pop(context, true),
               style: TextButton.styleFrom(foregroundColor: kFavMaroon),
               child: const Text('Sign Out'),
             ),
@@ -163,11 +191,46 @@ class _SettingsPageState extends State<SettingsPage> {
         );
       },
     );
+
+    if (confirm == true && mounted) {
+      try {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        await authProvider.signOut();
+        // Navigation will be handled by AuthWrapper
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to sign out: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // Initialize controllers with current user data
+        final user = authProvider.user;
+        final userEmail = user?.email ?? '';
+        final displayName = _getDisplayName(userEmail);
+        
+        // Update controllers if they're empty or user changed
+        if (_nameController.text.isEmpty || _nameController.text != displayName) {
+          _nameController.text = displayName;
+        }
+        if (_emailController.text.isEmpty || _emailController.text != userEmail) {
+          _emailController.text = userEmail;
+        }
+        
+        return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: kCreatePurple,
@@ -179,10 +242,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         title: const Text(
           'Settings',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
       ),
       body: SingleChildScrollView(
@@ -388,7 +448,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           onChanged: (value) {
                             setState(() => _eventRemindersEnabled = value);
                           },
-                          activeColor: kCreatePurple,
+                          activeThumbColor: kCreatePurple,
                         ),
                       ],
                     ),
@@ -408,12 +468,12 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     subtitle: Text(
                       _reminderTime,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                     ),
-                    trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey,
+                    ),
                     onTap: _showReminderTimeDialog,
                   ),
                 ],
@@ -452,10 +512,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   const Text(
                     'Profile visibility',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -520,10 +577,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   const SizedBox(height: 8),
                   Text(
                     'Your profile is visible to other Sabancı University members',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
               ),
@@ -570,7 +624,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: Colors.red,
                       ),
                     ),
-                    trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey,
+                    ),
                     onTap: _showDeleteAccountDialog,
                   ),
                   Divider(height: 1, color: Colors.grey[200]),
@@ -587,7 +644,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: Colors.red,
                       ),
                     ),
-                    trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey,
+                    ),
                     onTap: _showDeleteDataDialog,
                   ),
                 ],
@@ -611,10 +671,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 child: const Text(
                   'Sign Out',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -622,6 +679,8 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
       ),
+        );
+      },
     );
   }
 }

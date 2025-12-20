@@ -11,33 +11,8 @@ class FavoriteEventsPage extends StatefulWidget {
 }
 
 class _FavoriteEventsPageState extends State<FavoriteEventsPage> {
-  // Using EventModel from data_models.dart
-  final List<EventModel> _events = [
-    EventModel(
-      title: 'Freshman Orientation',
-      location: 'Sabancı University Performance Center',
-      date: '27 September 2025 - 11:00',
-      host: 'Orientation Office',
-      imageUrl:
-      'https://images.pexels.com/photos/3182796/pexels-photo-3182796.jpeg',
-    ),
-    EventModel(
-      title: 'Career Talks',
-      location: 'FASS - Sabancı University',
-      date: '4 October 2025 - 20:00',
-      host: 'IEEE Student Branch',
-      imageUrl:
-      'https://images.pexels.com/photos/1181555/pexels-photo-1181555.jpeg',
-    ),
-    EventModel(
-      title: 'Tennis Tournament',
-      location: 'Sabancı University - Sports Center',
-      date: '10 October 2025 - 10:30',
-      host: 'Murat Yılmaz',
-      imageUrl:
-      'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg',
-    ),
-  ];
+  // Empty list - favorites will be fetched from Firestore in future implementation
+  final List<EventModel> _events = [];
 
   @override
   Widget build(BuildContext context) {
@@ -53,24 +28,51 @@ class _FavoriteEventsPageState extends State<FavoriteEventsPage> {
       ),
       body: Container(
         color: const Color(0xFFF5F5F5),
-        child: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: _events.length,
-          itemBuilder: (context, index) {
-            final event = _events[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: EventCard(
-                event: event,
-                onUnfavorite: () {
-                  setState(() {
-                    _events.removeAt(index); // 👈 remove from list
-                  });
+        child: _events.isEmpty
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.favorite_border, size: 64, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text(
+                        'No favorite events yet',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Events you favorite will appear here',
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _events.length,
+                itemBuilder: (context, index) {
+                  final event = _events[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: EventCard(
+                      event: event,
+                      onUnfavorite: () {
+                        setState(() {
+                          _events.removeAt(index); // 👈 remove from list
+                        });
+                      },
+                    ),
+                  );
                 },
               ),
-            );
-          },
-        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: kFavMaroon,
@@ -78,7 +80,7 @@ class _FavoriteEventsPageState extends State<FavoriteEventsPage> {
         unselectedItemColor: Colors.white70,
         type: BottomNavigationBarType.fixed,
         currentIndex:
-        4, // change per screen: 0=Home,1=Search,2=Add,3=Tickets,4=Profile
+            4, // change per screen: 0=Home,1=Search,2=Add,3=Tickets,4=Profile
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
@@ -117,11 +119,7 @@ class EventCard extends StatelessWidget {
   final EventModel event;
   final VoidCallback onUnfavorite;
 
-  const EventCard({
-    super.key,
-    required this.event,
-    required this.onUnfavorite,
-  });
+  const EventCard({super.key, required this.event, required this.onUnfavorite});
 
   @override
   Widget build(BuildContext context) {
@@ -131,16 +129,12 @@ class EventCard extends StatelessWidget {
         // Navigate to detail page with the clicked event
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => EventDetailPage(event: event),
-          ),
+          MaterialPageRoute(builder: (_) => EventDetailPage(event: event)),
         );
       },
       child: Card(
         elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -151,10 +145,21 @@ class EventCard extends StatelessWidget {
                 child: SizedBox(
                   width: 90,
                   height: 90,
-                  child: Image.network(
-                    event.imageUrl,
-                    fit: BoxFit.cover,
-                  ),
+                  child: event.imageUrl != null && event.imageUrl!.isNotEmpty
+                      ? Image.network(
+                          event.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.event, size: 40),
+                            );
+                          },
+                        )
+                      : Container(
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.event, size: 40),
+                        ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -172,8 +177,11 @@ class EventCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.location_on,
-                            size: 16, color: kFavMaroon),
+                        const Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: kFavMaroon,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -186,8 +194,11 @@ class EventCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.calendar_today,
-                            size: 16, color: Colors.black54),
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: Colors.black54,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -200,8 +211,11 @@ class EventCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.person,
-                            size: 16, color: Colors.black54),
+                        const Icon(
+                          Icons.person,
+                          size: 16,
+                          color: Colors.black54,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(

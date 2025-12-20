@@ -1,8 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'event_detail_page.dart';
-import 'login_page.dart';
-import 'signup_page.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -135,7 +132,7 @@ class _WelcomePageState extends State<WelcomePage>
 
 // ----------------- EventDrop Card -----------------
 class _EventDropCard extends StatelessWidget {
-  const _EventDropCard({super.key});
+  const _EventDropCard();
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +212,6 @@ class _BlurCircle extends StatelessWidget {
   final double blurSigma;
 
   const _BlurCircle({
-    super.key,
     required this.size,
     required this.color,
     this.blurSigma = 40,
@@ -246,7 +242,6 @@ class _GradientButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const _GradientButton({
-    super.key,
     required this.text,
     required this.onPressed,
   });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/data_models.dart';
 import '../utils/app_style.dart';
+import '../services/firestore_service.dart';
 import 'event_detail_page.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,38 +12,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _selectedCategory = 'Academic';
-
-  final List<EventModel> _events = [
-    EventModel(
-      title: 'Chess Tournament',
-      location: 'SuCool - Sabancı University',
-      date: '2 December 2025 - 15.00',
-      host: 'Mert Arıcan',
-      imageUrl: 'https://media.istockphoto.com/id/1323563761/tr/fotoğraf/satranç-oynamak.jpg?s=612x612&w=0&k=20&c=eXyLB4b3c3h7zE0vXrgAOQHEHIYyRmJBck-xTyx9mNs=',
-    ),
-    EventModel(
-      title: 'Meeting With CEO',
-      location: 'FASS - Sabancı University',
-      date: '13 November 2025 - 17.30',
-      host: 'Rana Eda Yurtsever',
-      imageUrl: 'https://us.images.westend61.de/0001918627pw/female-ceo-manager-leading-corporate-meeting-in-office-businesswoman-in-meeting-with-colleagues-in-conference-room-HPIF32327.jpg',
-    ),
-    EventModel(
-      title: 'Campus Run',
-      location: 'Sports Center',
-      date: '15 November 2025 - 09.00',
-      host: 'Sports Club',
-      imageUrl: 'https://penntoday.upenn.edu/sites/default/files/2019-02/P-100603-Master-V1-010X_0.jpg',
-    ),
-    EventModel(
-      title: 'Midnight Study',
-      location: 'IC - Information Center',
-      date: '16 November 2025 - 23.00',
-      host: 'Study Group',
-      imageUrl: 'https://miro.medium.com/v2/resize:fit:1400/0*ihNJJS8J84lepr4h.jpg',
-    ),
-  ];
+  String _selectedCategory = 'All'; // Changed default to 'All' to show all events
+  final FirestoreService _firestoreService = FirestoreService();
 
   @override
   Widget build(BuildContext context) {
@@ -96,13 +67,54 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             _buildCategoryTabs(),
             const SizedBox(height: 10),
-            ListView.builder(
-              padding: const EdgeInsets.all(16),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _events.length,
-              itemBuilder: (context, index) {
-                return _buildEventCard(_events[index]);
+            // Real-time Firestore stream
+            StreamBuilder<List<EventModel>>(
+              stream: _selectedCategory == 'All'
+                  ? _firestoreService.getEventsStream()
+                  : _firestoreService.getEventsByCategoryStream(_selectedCategory),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Center(
+                      child: Text(
+                        'Error loading events: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  );
+                }
+
+                final events = snapshot.data ?? [];
+
+                if (events.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Center(
+                      child: Text(
+                        'No events found',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: events.length,
+                  itemBuilder: (context, index) {
+                    return _buildEventCard(events[index]);
+                  },
+                );
               },
             ),
           ],
@@ -206,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCategoryTabs() {
-    List<String> categories = ["Academic", "Clubs", "Social"];
+    List<String> categories = ["All", "Academic", "Clubs", "Social"];
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: categories.map((cat) {
@@ -267,12 +279,27 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  event.imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
+                child: event.imageUrl != null && event.imageUrl!.isNotEmpty
+                    ? Image.network(
+                        event.imageUrl!,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 80,
+                            height: 80,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.event, size: 40),
+                          );
+                        },
+                      )
+                    : Container(
+                        width: 80,
+                        height: 80,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.event, size: 40),
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -313,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          event.date,
+                          '${event.date} - ${event.time}',
                           style: const TextStyle(fontSize: 12),
                         ),
                       ],

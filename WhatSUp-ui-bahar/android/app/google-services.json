@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "222450165342",
+    "project_id": "denemeproje-5ef72",
+    "storage_bucket": "denemeproje-5ef72.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:222450165342:android:f7ec7774b559fea526b6cf",
+        "android_client_info": {
+          "package_name": "com.ilgaz.denemeproje"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqe0-4BSzmoKLrJBGX5N2_B1itQ9w-RrE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Events collection rules
+    match /events/{eventId} {
+      // Allow read: Anyone can read events (public data)
+      allow read: if request.auth != null;
+      
+      // Allow create: Only authenticated users can create events
+      allow create: if request.auth != null
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt is timestamp;
+      
+      // Allow update: Only the creator can update their own events
+      allow update: if request.auth != null
+        && resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == resource.data.createdAt;
+      
+      // Allow delete: Only the creator can delete their own events
+      allow delete: if request.auth != null
+        && resource.data.createdBy == request.auth.uid;
+    }
+    
+    // Default: Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

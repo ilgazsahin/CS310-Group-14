@@ -1,12 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../utils/app_styles.dart';
 import '../theme.dart';
+import '../providers/auth_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  String _getDisplayName(String? email) {
+    if (email == null || email.isEmpty) return 'User';
+    // Extract name from email (e.g., "john.doe@sabanciuniv.edu" -> "John Doe")
+    final emailPrefix = email.split('@').first;
+    if (emailPrefix.isEmpty) return 'User';
+    
+    final parts = emailPrefix.split('.');
+    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+      final firstName = parts[0].length > 1 
+          ? '${parts[0][0].toUpperCase()}${parts[0].substring(1)}'
+          : parts[0].toUpperCase();
+      final lastName = parts[1].length > 1
+          ? '${parts[1][0].toUpperCase()}${parts[1].substring(1)}'
+          : parts[1].toUpperCase();
+      return '$firstName $lastName';
+    }
+    return emailPrefix.length > 1
+        ? emailPrefix[0].toUpperCase() + emailPrefix.substring(1)
+        : emailPrefix.toUpperCase();
+  }
+
+  String _getDepartment(String? email) {
+    // You can customize this based on your needs
+    // For now, return a default or extract from email if there's a pattern
+    return 'Sabancı University';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.user;
+    final userEmail = user?.email ?? '';
+    final displayName = _getDisplayName(userEmail);
+    final department = _getDepartment(userEmail);
+    
     return Scaffold(
       backgroundColor: AppColors.primaryPurple,
       bottomNavigationBar: BottomNavigationBar(
@@ -56,19 +91,37 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 50,
-                      backgroundImage: NetworkImage('https://i.pravatar.cc/300'),
+                      backgroundColor: Colors.white,
+                      child: Text(
+                        displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U',
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryPurple,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 20),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Efe Aslan', style: AppTextStyles.headerName),
-                          SizedBox(height: 5),
+                        children: [
+                          Text(displayName, style: AppTextStyles.headerName),
+                          const SizedBox(height: 5),
                           Text(
-                            'Faculty of Arts and\nSocial Sciences',
+                            department,
                             style: AppTextStyles.headerDepartment,
                           ),
+                          if (userEmail.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              userEmail,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -107,13 +160,53 @@ class ProfileScreen extends StatelessWidget {
 
 
                 InkWell(
-                  onTap: () {
-                    // tüm sayfa geçmişini silip WelcomePage'e dön
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/',              // main.dart'taki WelcomePage route'u
-                          (route) => false, // önceki tüm sayfaları sil
+                  onTap: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Sign Out'),
+                          content: const Text('Are you sure you want to sign out?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFF900040),
+                              ),
+                              child: const Text('Sign Out'),
+                            ),
+                          ],
+                        );
+                      },
                     );
+
+                    if (confirm == true && context.mounted) {
+                      try {
+                        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                        await authProvider.signOut();
+                        // Navigation will be handled by AuthWrapper
+                        if (context.mounted) {
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            '/',
+                            (route) => false,
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to sign out: ${e.toString()}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    }
                   },
                   child: Container(
                     width: double.infinity,

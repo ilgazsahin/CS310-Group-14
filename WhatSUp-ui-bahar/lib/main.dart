@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 
 import 'theme.dart';
-import 'screens/login_page.dart' as login;
-import 'screens/signup_page.dart' as signup;
-import 'screens/welcome_page.dart';
+import 'widgets/auth_wrapper.dart';
+import 'providers/auth_provider.dart';
 import 'screens/event_detail_page.dart';
 import 'screens/create_event_page.dart';
 import 'screens/favorite_events_page.dart';
@@ -19,7 +20,9 @@ import 'screens/settings_page.dart';
 
 import 'models/data_models.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -28,33 +31,37 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Event App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: kCreatePurple),
-        useMaterial3: true,
-        textTheme: GoogleFonts.poppinsTextTheme(),
-      ),
-      // First screen of the app
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const WelcomePage(),
-        '/login': (context) => const LoginPage(),     
-        '/signup': (context) => const SignUpPage(),
-        '/create-event': (context) => const CreateEventPage(),
-        '/favorites': (context) => const FavoriteEventsPage(),
-        '/event-detail': (context) {
-          final event = ModalRoute.of(context)!.settings.arguments as EventModel;
-          return EventDetailPage(event: event);
+    return ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Event App',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: kCreatePurple),
+          useMaterial3: true,
+          textTheme: GoogleFonts.poppinsTextTheme(),
+        ),
+        // First screen of the app - AuthWrapper handles routing based on auth state
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const AuthWrapper(),
+          '/login': (context) => const LoginPage(),
+          '/signup': (context) => const SignUpPage(),
+          '/create-event': (context) => const CreateEventPage(),
+          '/favorites': (context) => const FavoriteEventsPage(),
+          '/event-detail': (context) {
+            final event =
+                ModalRoute.of(context)!.settings.arguments as EventModel;
+            return EventDetailPage(event: event);
+          },
+          '/profile': (context) => const ProfileScreen(),
+          '/my_listings': (context) => const MyListingsScreen(),
+          '/home': (context) => const HomeScreen(),
+          '/search': (context) => const SearchScreen(),
+          '/tickets': (context) => const TicketsPage(),
+          '/settings': (context) => const SettingsPage(),
         },
-        '/profile': (context) => const ProfileScreen(),
-        '/my_listings': (context) => const MyListingsScreen(),
-        '/home': (context) => const HomeScreen(),
-        '/search': (context) => const SearchScreen(),
-        '/tickets': (context) => const TicketsPage(),
-        '/settings': (context) => const SettingsPage(),
-      },
+      ),
     );
   }
 }

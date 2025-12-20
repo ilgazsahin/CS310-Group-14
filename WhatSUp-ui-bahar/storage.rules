@@ -1,0 +1,25 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Event images folder
+    match /event_images/{imageId} {
+      // Allow read: Anyone authenticated can view event images
+      allow read: if request.auth != null;
+      
+      // Allow write: Only authenticated users can upload images
+      // Images are uploaded during event creation, so we allow authenticated users
+      allow write: if request.auth != null
+        && request.resource.size < 5 * 1024 * 1024 // 5MB limit
+        && request.resource.contentType.matches('image/.*');
+      
+      // Allow delete: Only authenticated users (event creators will delete via app logic)
+      allow delete: if request.auth != null;
+    }
+    
+    // Default: Deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
