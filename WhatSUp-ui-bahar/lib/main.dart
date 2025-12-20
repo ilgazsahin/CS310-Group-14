@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
 import 'theme.dart';
 import 'widgets/auth_wrapper.dart';
 import 'providers/auth_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/event_detail_page.dart';
 import 'screens/create_event_page.dart';
 import 'screens/edit_event_page.dart';
@@ -32,39 +32,44 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Event App',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: kCreatePurple),
-          useMaterial3: true,
-          textTheme: GoogleFonts.poppinsTextTheme(),
-        ),
-        // First screen of the app - AuthWrapper handles routing based on auth state
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const AuthWrapper(),
-        '/login': (context) => const LoginPage(),
-        '/signup': (context) => const SignUpPage(),
-        '/create-event': (context) => const CreateEventPage(),
-        '/edit-event': (context) {
-          final event = ModalRoute.of(context)!.settings.arguments as EventModel;
-          return EditEventPage(event: event);
-        },
-        '/favorites': (context) => const FavoriteEventsPage(),
-          '/event-detail': (context) {
-            final event =
-                ModalRoute.of(context)!.settings.arguments as EventModel;
-            return EventDetailPage(event: event);
-          },
-          '/profile': (context) => const ProfileScreen(),
-          '/my_listings': (context) => const MyListingsScreen(),
-          '/home': (context) => const HomeScreen(),
-          '/search': (context) => const SearchScreen(),
-          '/tickets': (context) => const TicketsPage(),
-          '/settings': (context) => const SettingsPage(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Event App',
+            themeMode: themeProvider.themeMode,
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            // First screen of the app - AuthWrapper handles routing based on auth state
+            initialRoute: '/',
+            routes: {
+              '/': (context) => const AuthWrapper(),
+            '/login': (context) => const LoginPage(),
+            '/signup': (context) => const SignUpPage(),
+            '/create-event': (context) => const CreateEventPage(),
+            '/edit-event': (context) {
+              final event = ModalRoute.of(context)!.settings.arguments as EventModel;
+              return EditEventPage(event: event);
+            },
+            '/favorites': (context) => const FavoriteEventsPage(),
+              '/event-detail': (context) {
+                final event =
+                    ModalRoute.of(context)!.settings.arguments as EventModel;
+                return EventDetailPage(event: event);
+              },
+              '/profile': (context) => const ProfileScreen(),
+              '/my_listings': (context) => const MyListingsScreen(),
+              '/home': (context) => const HomeScreen(),
+              '/search': (context) => const SearchScreen(),
+              '/tickets': (context) => const TicketsPage(),
+              '/settings': (context) => const SettingsPage(),
+            },
+          );
         },
       ),
     );

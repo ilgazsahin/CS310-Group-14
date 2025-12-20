@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme.dart';
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
 
 class SettingsPage extends StatefulWidget {
   static const String routeName = '/settings';
@@ -309,7 +310,7 @@ class _SettingsPageState extends State<SettingsPage> {
         }
 
         return Scaffold(
-          backgroundColor: Colors.grey[50],
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             backgroundColor: kCreatePurple,
             foregroundColor: Colors.white,
@@ -344,7 +345,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -484,7 +485,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -634,6 +635,71 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
 
+                // APPEARANCE Section
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                  child: Text(
+                    'APPEARANCE',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Dark Mode',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Switch between light and dark theme',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Consumer<ThemeProvider>(
+                        builder: (context, themeProvider, child) {
+                          return Switch(
+                            value: themeProvider.isDarkMode,
+                            onChanged: (_) => themeProvider.toggleTheme(),
+                            activeColor: kCreatePurple,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
                 // NOTIFICATIONS Section
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
@@ -650,7 +716,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -745,7 +811,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -854,7 +920,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
