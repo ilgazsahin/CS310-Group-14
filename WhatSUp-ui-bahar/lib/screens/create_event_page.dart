@@ -6,8 +6,8 @@ import '../theme.dart';
 import '../services/firestore_service.dart';
 import '../services/storage_service.dart';
 import '../models/data_models.dart';
-import 'package:provider/provider.dart';
-import '../providers/event_provider.dart';
+import 'package:provider/provider.dart'; // added
+import '../providers/event_provider.dart'; // added
 
 class CreateEventPage extends StatefulWidget {
   const CreateEventPage({super.key});
@@ -281,7 +281,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
         createdAt: DateTime.now(),
       );
 
-      await Provider.of<EventProvider>(context, listen: false).createEvent(event);
+      await Provider.of<EventProvider>(context, listen: false).createEvent(event); // added
       print('Event created successfully with ID: $eventId'); // Debug log
 
       if (mounted) {

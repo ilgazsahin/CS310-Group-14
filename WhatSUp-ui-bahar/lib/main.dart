@@ -20,7 +20,7 @@ import 'screens/signup_page.dart';
 import 'screens/settings_page.dart';
 
 import 'models/data_models.dart';
-import 'providers/event_provider.dart';
+import 'providers/event_provider.dart'; // added
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => EventProvider()), // added
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
