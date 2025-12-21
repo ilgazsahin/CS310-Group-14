@@ -19,7 +19,7 @@ class EventProvider extends ChangeNotifier {
   }
 
 
-  Future<void> deleteEvent(String eventId) async {
+  Future<void> deleteEvent(String eventId) async { // ezgi wrote after that, elif sude did the first part
     try {
       await _firestoreService.deleteEvent(eventId);
       notifyListeners();
