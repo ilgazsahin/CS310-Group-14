@@ -6,7 +6,7 @@ class EventProvider extends ChangeNotifier {
   final FirestoreService _firestoreService = FirestoreService();
 
 
-  Stream<List<EventModel>> get allEvents => _firestoreService.getEventsStream();
+  Stream<List<gitEventModel>> get allEvents => _firestoreService.getEventsStream();
   Stream<List<EventModel>> get myEvents => _firestoreService.getUserEventsStream();
 
   Future<void> createEvent(EventModel event) async {
