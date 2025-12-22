@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/data_models.dart';
 import 'auth_service.dart';
 
@@ -6,6 +7,9 @@ import 'auth_service.dart';
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthService _authService = AuthService();
+
+  // Get current user
+  User? get currentUser => _authService.currentUser;
 
   // Collection reference
   CollectionReference get _eventsCollection => _firestore.collection('events');
@@ -450,8 +454,7 @@ class FirestoreService {
   // ========== POST OPERATIONS ==========
 
   // Collection reference for posts
-  CollectionReference get _postsCollection =>
-      _firestore.collection('posts');
+  CollectionReference get _postsCollection => _firestore.collection('posts');
 
   /// CREATE: Add a new post to Firestore
   Future<String> createPost(PostModel post) async {
@@ -645,16 +648,13 @@ class FirestoreService {
       }
 
       // Add like document
-      await _getLikesCollection(postId).doc(user.uid).set({
-        'userId': user.uid,
-        'createdAt': Timestamp.now(),
-      });
+      await _getLikesCollection(
+        postId,
+      ).doc(user.uid).set({'userId': user.uid, 'createdAt': Timestamp.now()});
 
       // Update post like count
       final currentCount = await getPostLikeCount(postId);
-      await _postsCollection.doc(postId).update({
-        'likes': currentCount,
-      });
+      await _postsCollection.doc(postId).update({'likes': currentCount});
     } catch (e) {
       throw 'Failed to like post: ${e.toString()}';
     }
@@ -673,9 +673,7 @@ class FirestoreService {
 
       // Update post like count
       final currentCount = await getPostLikeCount(postId);
-      await _postsCollection.doc(postId).update({
-        'likes': currentCount,
-      });
+      await _postsCollection.doc(postId).update({'likes': currentCount});
     } catch (e) {
       throw 'Failed to unlike post: ${e.toString()}';
     }
@@ -694,7 +692,8 @@ class FirestoreService {
   // ========== COMMENTS ==========
 
   /// Collection reference for comments
-  CollectionReference get _commentsCollection => _firestore.collection('comments');
+  CollectionReference get _commentsCollection =>
+      _firestore.collection('comments');
 
   /// CREATE: Add a comment to a post
   Future<String> createComment(CommentModel comment) async {
@@ -777,9 +776,7 @@ class FirestoreService {
 
       // Update post comment count
       final commentCount = await getPostCommentCount(postId);
-      await _postsCollection.doc(postId).update({
-        'comments': commentCount,
-      });
+      await _postsCollection.doc(postId).update({'comments': commentCount});
     } catch (e) {
       throw 'Failed to delete comment: ${e.toString()}';
     }

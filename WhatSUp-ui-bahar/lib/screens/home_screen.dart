@@ -17,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'All'; // Changed default to 'All' to show all events
   final FirestoreService _firestoreService = FirestoreService();
   DateTime _currentMonth = DateTime.now();
+  DateTime? _selectedDate; // Track selected date (null = show all events)
   List<EventModel> _cachedEvents = []; // Cache events to prevent flicker
   List<EventModel> _cachedFilteredEvents =
       []; // Cache filtered events to prevent flicker
@@ -140,26 +141,132 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Use cached events to prevent flicker
                     final events = _cachedFilteredEvents;
 
-                    if (events.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.all(32.0),
+                    // Filter events by selected date (if a date is selected)
+                    final filteredEvents = _selectedDate != null
+                        ? events.where((e) {
+                            final d = _parseEventDate(e.date);
+                            return d != null &&
+                                d.day == _selectedDate!.day &&
+                                d.month == _selectedDate!.month &&
+                                d.year == _selectedDate!.year;
+                          }).toList()
+                        : events; // Show all events if no date selected
+
+                    if (filteredEvents.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.all(40.0),
                         child: Center(
-                          child: Text(
-                            'No events found',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _selectedDate != null
+                                    ? 'There are no events registered for this date.'
+                                    : 'No events found.',
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              if (_selectedDate != null) ...[
+                                const SizedBox(height: 16),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedDate =
+                                          null; // Clear selection to show all
+                                    });
+                                  },
+                                  child: const Text('Show All Events'),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                       );
                     }
 
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: events.length,
-                      itemBuilder: (context, index) {
-                        return _buildEventCard(events[index]);
-                      },
+                    return Column(
+                      children: [
+                        // Show "Show All Events" button when a date is selected
+                        if (_selectedDate != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.calendarBg.withOpacity(
+                                        0.1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: AppColors.calendarBg.withOpacity(
+                                          0.3,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_today,
+                                          size: 16,
+                                          color: AppColors.calendarBg,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Showing events for ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.calendarBg,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedDate =
+                                          null; // Clear selection to show all
+                                    });
+                                  },
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  label: const Text('Show All'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.calendarBg,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: filteredEvents.length,
+                          itemBuilder: (context, index) {
+                            return _buildEventCard(filteredEvents[index]);
+                          },
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -190,8 +297,10 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Get dates that have events in the current month
   Set<int> _getEventDates(List<EventModel> events, DateTime month) {
     final eventDates = <int>{};
+
     for (final event in events) {
       final eventDate = _parseEventDate(event.date);
+
       if (eventDate != null &&
           eventDate.year == month.year &&
           eventDate.month == month.month) {
@@ -337,34 +446,60 @@ class _HomeScreenState extends State<HomeScreen> {
                 return const SizedBox();
               }
 
+              final cellDate = DateTime(
+                _currentMonth.year,
+                _currentMonth.month,
+                dayNumber,
+              );
               final hasEvent = eventDates.contains(dayNumber);
-              final isToday =
-                  dayNumber == DateTime.now().day &&
-                  _currentMonth.month == DateTime.now().month &&
-                  _currentMonth.year == DateTime.now().year;
 
-              return Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: hasEvent
-                      ? Border.all(color: Colors.white, width: 2)
-                      : isToday
-                      ? Border.all(
-                          color: Colors.white.withOpacity(0.5),
-                          width: 1.5,
-                        )
-                      : null,
-                  color: isToday ? Colors.white.withOpacity(0.2) : null,
-                ),
-                child: Center(
-                  child: Text(
-                    "$dayNumber",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: hasEvent
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      fontSize: hasEvent ? 16 : 14,
+              // Check if this is today's date
+              final today = DateTime.now();
+              final isToday =
+                  dayNumber == today.day &&
+                  _currentMonth.month == today.month &&
+                  _currentMonth.year == today.year;
+
+              final isSelected =
+                  _selectedDate != null &&
+                  _selectedDate!.day == dayNumber &&
+                  _selectedDate!.month == _currentMonth.month &&
+                  _selectedDate!.year == _currentMonth.year;
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    // Toggle: if clicking the same date, deselect it (show all)
+                    if (isSelected) {
+                      _selectedDate = null;
+                    } else {
+                      _selectedDate = cellDate;
+                    }
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isSelected
+                        ? Colors.white.withOpacity(0.3) // Selected date
+                        : isToday
+                        ? Colors.orange.withOpacity(
+                            0.8,
+                          ) // Today's date - different color
+                        : Colors.transparent,
+                    border: hasEvent
+                        ? Border.all(color: Colors.white, width: 2)
+                        : null,
+                  ),
+                  child: Center(
+                    child: Text(
+                      "$dayNumber",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: isSelected || hasEvent || isToday
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -513,7 +648,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          event.host,
+                          event.hosts.isNotEmpty
+                              ? event.hosts.first
+                              : 'Unknown',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
