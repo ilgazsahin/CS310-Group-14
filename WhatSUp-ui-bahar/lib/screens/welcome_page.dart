@@ -146,7 +146,7 @@ class _EventDropCard extends StatelessWidget {
       child: Column(
         children: [
           const Text(
-            "EventDrop",
+            "WhatSUp EventDrop",
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,

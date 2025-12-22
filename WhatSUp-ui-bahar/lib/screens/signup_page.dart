@@ -201,7 +201,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   keyboardType: TextInputType.name,
                                   textCapitalization: TextCapitalization.words,
                                   decoration: InputDecoration(
-                                    hintText: 'value',
+                                    hintText: 'Enter name and surname',
                                     filled: true,
                                     fillColor: Colors.white.withOpacity(0.9),
                                     border: OutlineInputBorder(
@@ -233,7 +233,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   autocorrect: false,
                                   enableSuggestions: false,
                                   decoration: InputDecoration(
-                                    hintText: 'value',
+                                    hintText: 'Enter email',
                                     filled: true,
                                     fillColor: Colors.white.withOpacity(0.9),
                                     border: OutlineInputBorder(
@@ -282,7 +282,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 const SizedBox(height: 20),
 
                                 const Text(
-                                  'Password',
+                                  'Password - at least 6 characters',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
@@ -295,7 +295,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   validator: _validatePassword,
                                   obscureText: true,
                                   decoration: InputDecoration(
-                                    hintText: 'value',
+                                    hintText: 'Enter a password',
                                     filled: true,
                                     fillColor: Colors.white.withOpacity(0.9),
                                     border: OutlineInputBorder(
@@ -380,7 +380,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                             ),
                             const Text(
-                              ' here',
+                              'here',
                               style: TextStyle(
                                 color: Color(0xFF9EFF1F),
                                 fontSize: 14,
@@ -389,24 +389,6 @@ class _SignUpPageState extends State<SignUpPage> {
                           ],
                         ),
                         const SizedBox(height: 16),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'Need help with the app ',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                            Icon(
-                              Icons.help_outline,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
