@@ -199,7 +199,8 @@ class FirestoreService {
   // ========== TICKET OPERATIONS ==========
 
   // Collection reference for tickets
-  CollectionReference get _ticketsCollection => _firestore.collection('tickets');
+  CollectionReference get _ticketsCollection =>
+      _firestore.collection('tickets');
 
   /// CREATE: Create a ticket for an event
   Future<String> createTicket(EventModel event) async {
@@ -331,5 +332,118 @@ class FirestoreService {
     } catch (e) {
       throw 'Failed to delete ticket: ${e.toString()}';
     }
+  }
+
+  // ========== FAVORITE EVENTS OPERATIONS ==========
+
+  // Collection reference for favorites
+  CollectionReference get _favoritesCollection =>
+      _firestore.collection('favorites');
+
+  /// CREATE: Add an event to favorites
+  Future<void> addFavoriteEvent(String eventId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to favorite events';
+      }
+
+      // Check if already favorited
+      final existingFavorites = await _favoritesCollection
+          .where('userId', isEqualTo: user.uid)
+          .where('eventId', isEqualTo: eventId)
+          .limit(1)
+          .get();
+
+      if (existingFavorites.docs.isNotEmpty) {
+        throw 'Event is already in your favorites';
+      }
+
+      // Add to favorites
+      await _favoritesCollection.add({
+        'userId': user.uid,
+        'eventId': eventId,
+        'createdAt': Timestamp.fromDate(DateTime.now()),
+      });
+    } catch (e) {
+      throw 'Failed to add favorite: ${e.toString()}';
+    }
+  }
+
+  /// DELETE: Remove an event from favorites
+  Future<void> removeFavoriteEvent(String eventId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to remove favorites';
+      }
+
+      // Find the favorite document
+      final favorites = await _favoritesCollection
+          .where('userId', isEqualTo: user.uid)
+          .where('eventId', isEqualTo: eventId)
+          .limit(1)
+          .get();
+
+      if (favorites.docs.isEmpty) {
+        throw 'Event is not in your favorites';
+      }
+
+      // Delete the favorite document
+      await _favoritesCollection.doc(favorites.docs.first.id).delete();
+    } catch (e) {
+      throw 'Failed to remove favorite: ${e.toString()}';
+    }
+  }
+
+  /// READ: Check if user has favorited an event
+  Future<bool> isEventFavorited(String eventId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) return false;
+
+      final favorites = await _favoritesCollection
+          .where('userId', isEqualTo: user.uid)
+          .where('eventId', isEqualTo: eventId)
+          .limit(1)
+          .get();
+
+      return favorites.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// READ: Get all favorite events for current user (real-time stream)
+  Stream<List<EventModel>> getFavoriteEventsStream() {
+    final user = _authService.currentUser;
+    if (user == null) {
+      return Stream.value([]);
+    }
+
+    return _favoritesCollection
+        .where('userId', isEqualTo: user.uid)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .asyncMap((snapshot) async {
+          // Get all event IDs from favorites
+          final eventIds = snapshot.docs
+              .map(
+                (doc) =>
+                    (doc.data() as Map<String, dynamic>)['eventId'] as String,
+              )
+              .toList();
+
+          if (eventIds.isEmpty) {
+            return <EventModel>[];
+          }
+
+          // Fetch all events in parallel
+          final eventFutures = eventIds.map((eventId) => getEvent(eventId));
+          final events = await Future.wait(eventFutures);
+
+          // Filter out null events (in case an event was deleted)
+          return events.whereType<EventModel>().toList();
+        });
   }
 }

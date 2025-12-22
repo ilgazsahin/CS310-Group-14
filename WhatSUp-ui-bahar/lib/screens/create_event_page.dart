@@ -169,7 +169,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
             builder: (context) => Text(
               'Add Image',
               style: TextStyle(
-                color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.color?.withOpacity(0.7),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -179,7 +181,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
             builder: (context) => Text(
               'Tap to choose from gallery or camera',
               style: TextStyle(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.5),
                 fontSize: 12,
               ),
             ),
@@ -281,7 +285,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
         createdAt: DateTime.now(),
       );
 
-      await Provider.of<EventProvider>(context, listen: false).createEvent(event); // added
+      final eventId = await Provider.of<EventProvider>(
+        context,
+        listen: false,
+      ).createEvent(event); // added
       print('Event created successfully with ID: $eventId'); // Debug log
 
       if (mounted) {
@@ -502,7 +509,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   'Note: If you provide both an image file and URL, the URL will be used.',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.color?.withOpacity(0.6),
                     fontStyle: FontStyle.italic,
                   ),
                 ),

@@ -44,6 +44,23 @@ service cloud.firestore {
       allow delete: if request.auth != null
         && resource.data.userId == request.auth.uid;
     }
+
+    // Favorites collection rules
+    match /favorites/{favoriteId} {
+      // Allow read: Users can only read their own favorites
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      
+      // Allow create: Only authenticated users can create favorites for themselves
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.eventId is string
+        && request.resource.data.createdAt is timestamp;
+      
+      // Allow delete: Users can only delete their own favorites
+      allow delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
     
     // Default: Deny all other access
     match /{document=**} {

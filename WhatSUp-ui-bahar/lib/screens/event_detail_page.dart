@@ -18,17 +18,22 @@ class _EventDetailPageState extends State<EventDetailPage> {
   bool _hasTicket = false;
   bool _isCheckingTicket = true;
   bool _isCreatingTicket = false;
+  bool _isFavorited = false;
+  bool _isCheckingFavorite = true;
 
   @override
   void initState() {
     super.initState();
     _checkTicketStatus();
+    _checkFavoriteStatus();
   }
 
   Future<void> _checkTicketStatus() async {
     if (widget.event.id != null) {
       try {
-        final hasTicket = await _firestoreService.userHasTicket(widget.event.id!);
+        final hasTicket = await _firestoreService.userHasTicket(
+          widget.event.id!,
+        );
         if (mounted) {
           setState(() {
             _hasTicket = hasTicket;
@@ -47,6 +52,77 @@ class _EventDetailPageState extends State<EventDetailPage> {
         setState(() {
           _isCheckingTicket = false;
         });
+      }
+    }
+  }
+
+  Future<void> _checkFavoriteStatus() async {
+    if (widget.event.id != null) {
+      try {
+        final isFavorited = await _firestoreService.isEventFavorited(
+          widget.event.id!,
+        );
+        if (mounted) {
+          setState(() {
+            _isFavorited = isFavorited;
+            _isCheckingFavorite = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isCheckingFavorite = false;
+          });
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _isCheckingFavorite = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (widget.event.id == null) return;
+
+    try {
+      if (_isFavorited) {
+        await _firestoreService.removeFavoriteEvent(widget.event.id!);
+        if (mounted) {
+          setState(() {
+            _isFavorited = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Removed from favorites'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      } else {
+        await _firestoreService.addFavoriteEvent(widget.event.id!);
+        if (mounted) {
+          setState(() {
+            _isFavorited = true;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Added to favorites'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update favorite: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -147,14 +223,23 @@ class _EventDetailPageState extends State<EventDetailPage> {
             fontWeight: FontWeight.w700,
           ),
         ),
-        actions: _firestoreService.canUserModifyEvent(widget.event)
-            ? [
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.white),
-                  onPressed: () => _showDeleteDialog(),
-                ),
-              ]
-            : null,
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isFavorited ? Icons.favorite : Icons.favorite_border,
+              color: _isFavorited ? kFavMaroon : Colors.white,
+            ),
+            onPressed: _isCheckingFavorite ? null : _toggleFavorite,
+            tooltip: _isFavorited
+                ? 'Remove from favorites'
+                : 'Add to favorites',
+          ),
+          if (_firestoreService.canUserModifyEvent(widget.event))
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.white),
+              onPressed: () => _showDeleteDialog(),
+            ),
+        ],
       ),
 
       // NAVBAR
@@ -230,7 +315,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _PosterArea(title: widget.event.title, imageUrl: widget.event.imageUrl ?? ''),
+                _PosterArea(
+                  title: widget.event.title,
+                  imageUrl: widget.event.imageUrl ?? '',
+                ),
                 const SizedBox(height: 24),
 
                 _PriceDateTime(
@@ -743,7 +831,9 @@ class _GetTicketButton extends StatelessWidget {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : const Row(

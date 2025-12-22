@@ -12,11 +12,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _selectedCategory = 'All'; // Changed default to 'All' to show all events
+  String _selectedCategory =
+      'All'; // Changed default to 'All' to show all events
   final FirestoreService _firestoreService = FirestoreService();
   DateTime _currentMonth = DateTime.now();
   List<EventModel> _cachedEvents = []; // Cache events to prevent flicker
-  List<EventModel> _cachedFilteredEvents = []; // Cache filtered events to prevent flicker
+  List<EventModel> _cachedFilteredEvents =
+      []; // Cache filtered events to prevent flicker
 
   @override
   Widget build(BuildContext context) {
@@ -70,12 +72,13 @@ class _HomeScreenState extends State<HomeScreen> {
           if (eventsSnapshot.hasData) {
             _cachedEvents = eventsSnapshot.data!;
           }
-          
+
           // Use cached events to prevent flicker when month changes
           final allEvents = _cachedEvents;
-          
+
           // Show loading state only on initial load
-          if (eventsSnapshot.connectionState == ConnectionState.waiting && _cachedEvents.isEmpty) {
+          if (eventsSnapshot.connectionState == ConnectionState.waiting &&
+              _cachedEvents.isEmpty) {
             return SingleChildScrollView(
               child: Column(
                 children: [
@@ -91,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           }
-          
+
           return SingleChildScrollView(
             child: Column(
               children: [
@@ -103,7 +106,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 StreamBuilder<List<EventModel>>(
                   stream: _selectedCategory == 'All'
                       ? _firestoreService.getEventsStream()
-                      : _firestoreService.getEventsByCategoryStream(_selectedCategory),
+                      : _firestoreService.getEventsByCategoryStream(
+                          _selectedCategory,
+                        ),
                   builder: (context, snapshot) {
                     // Update cached filtered events when new data arrives
                     if (snapshot.hasData) {
@@ -111,7 +116,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
 
                     // Only show loading on initial load when there's no cached data
-                    if (snapshot.connectionState == ConnectionState.waiting && _cachedFilteredEvents.isEmpty) {
+                    if (snapshot.connectionState == ConnectionState.waiting &&
+                        _cachedFilteredEvents.isEmpty) {
                       return const Padding(
                         padding: EdgeInsets.all(32.0),
                         child: Center(child: CircularProgressIndicator()),
@@ -207,14 +213,22 @@ class _HomeScreenState extends State<HomeScreen> {
       'September',
       'October',
       'November',
-      'December'
+      'December',
     ];
 
     final eventDates = _getEventDates(allEvents, _currentMonth);
-    
+
     // Get first day of month and number of days
-    final firstDayOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
-    final lastDayOfMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
+    final firstDayOfMonth = DateTime(
+      _currentMonth.year,
+      _currentMonth.month,
+      1,
+    );
+    final lastDayOfMonth = DateTime(
+      _currentMonth.year,
+      _currentMonth.month + 1,
+      0,
+    );
     final daysInMonth = lastDayOfMonth.day;
     final startingWeekday = firstDayOfMonth.weekday; // 1 = Monday, 7 = Sunday
     // Convert to 0-based where 0 = Sunday (for our calendar display)
@@ -244,7 +258,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.chevron_left, color: Colors.white),
                 onPressed: () {
                   setState(() {
-                    _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
+                    _currentMonth = DateTime(
+                      _currentMonth.year,
+                      _currentMonth.month - 1,
+                    );
                   });
                 },
               ),
@@ -260,10 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Text(
                     "${_currentMonth.year}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
                   ),
                 ],
               ),
@@ -271,7 +285,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.chevron_right, color: Colors.white),
                 onPressed: () {
                   setState(() {
-                    _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
+                    _currentMonth = DateTime(
+                      _currentMonth.year,
+                      _currentMonth.month + 1,
+                    );
                   });
                 },
               ),
@@ -313,14 +330,15 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               // Calculate which day this cell represents
               final dayNumber = index - startingDayIndex + 1;
-              
+
               // Empty cells before month starts
               if (dayNumber < 1 || dayNumber > daysInMonth) {
                 return const SizedBox();
               }
 
               final hasEvent = eventDates.contains(dayNumber);
-              final isToday = dayNumber == DateTime.now().day &&
+              final isToday =
+                  dayNumber == DateTime.now().day &&
                   _currentMonth.month == DateTime.now().month &&
                   _currentMonth.year == DateTime.now().year;
 
@@ -330,25 +348,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   border: hasEvent
                       ? Border.all(color: Colors.white, width: 2)
                       : isToday
-                          ? Border.all(color: Colors.white.withOpacity(0.5), width: 1.5)
-                          : null,
-                  color: isToday
-                      ? Colors.white.withOpacity(0.2)
+                      ? Border.all(
+                          color: Colors.white.withOpacity(0.5),
+                          width: 1.5,
+                        )
                       : null,
+                  color: isToday ? Colors.white.withOpacity(0.2) : null,
                 ),
                 child: Center(
                   child: Text(
                     "$dayNumber",
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight: hasEvent ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: hasEvent
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                       fontSize: hasEvent ? 16 : 14,
                     ),
                   ),
                 ),
               );
             },
-          )
+          ),
         ],
       ),
     );
@@ -372,11 +393,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 cat,
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight:
-                  isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected 
-                      ? Theme.of(context).textTheme.bodyLarge?.color 
-                      : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? Theme.of(context).textTheme.bodyLarge?.color
+                      : Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.color?.withOpacity(0.6),
                 ),
               ),
               if (isSelected)
@@ -385,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 2,
                   width: 40,
                   color: AppColors.calendarBg,
-                )
+                ),
             ],
           ),
         );
@@ -400,16 +422,12 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => EventDetailPage(event: event),
-          ),
+          MaterialPageRoute(builder: (_) => EventDetailPage(event: event)),
         );
       },
       child: Card(
         margin: const EdgeInsets.only(bottom: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 3,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -421,9 +439,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: event.imageUrl != null && event.imageUrl!.isNotEmpty
                     ? Image.network(
                         event.imageUrl!,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             width: 80,
@@ -438,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 80,
                         color: Colors.grey[300],
                         child: const Icon(Icons.event, size: 40),
-                ),
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -505,15 +523,102 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(top: 30),
-                child: Icon(
-                  Icons.favorite,
-                  color: AppColors.navBarBg,
-                ),
+              _FavoriteButton(
+                event: event,
+                firestoreService: _firestoreService,
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FavoriteButton extends StatefulWidget {
+  final EventModel event;
+  final FirestoreService firestoreService;
+
+  const _FavoriteButton({required this.event, required this.firestoreService});
+
+  @override
+  State<_FavoriteButton> createState() => _FavoriteButtonState();
+}
+
+class _FavoriteButtonState extends State<_FavoriteButton> {
+  bool _isFavorited = false;
+  bool _isChecking = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFavoriteStatus();
+  }
+
+  Future<void> _checkFavoriteStatus() async {
+    if (widget.event.id == null) {
+      setState(() => _isChecking = false);
+      return;
+    }
+
+    try {
+      final isFavorited = await widget.firestoreService.isEventFavorited(
+        widget.event.id!,
+      );
+      if (mounted) {
+        setState(() {
+          _isFavorited = isFavorited;
+          _isChecking = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isChecking = false);
+      }
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (widget.event.id == null || _isChecking) return;
+
+    try {
+      if (_isFavorited) {
+        await widget.firestoreService.removeFavoriteEvent(widget.event.id!);
+        if (mounted) {
+          setState(() => _isFavorited = false);
+        }
+      } else {
+        await widget.firestoreService.addFavoriteEvent(widget.event.id!);
+        if (mounted) {
+          setState(() => _isFavorited = true);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update favorite: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 30),
+      child: GestureDetector(
+        onTap: () {
+          _toggleFavorite();
+        },
+        behavior: HitTestBehavior.opaque,
+        child: Icon(
+          _isFavorited ? Icons.favorite : Icons.favorite_border,
+          color: _isFavorited ? AppColors.navBarBg : Colors.grey,
+          size: 24,
         ),
       ),
     );
