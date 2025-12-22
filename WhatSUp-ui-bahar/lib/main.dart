@@ -19,9 +19,14 @@ import 'screens/tickets_page.dart';
 import 'screens/login_page.dart';
 import 'screens/signup_page.dart';
 import 'screens/settings_page.dart';
+import 'screens/create_post_page.dart';
+import 'screens/post_detail_page.dart';
+import 'screens/my_posts_screen.dart';
+import 'screens/edit_post_page.dart';
 
 import 'models/data_models.dart';
 import 'providers/event_provider.dart'; // added
+import 'providers/post_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +45,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()), // added
+        ChangeNotifierProvider(create: (_) => PostProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -72,6 +78,18 @@ class MyApp extends StatelessWidget {
               '/search': (context) => const SearchScreen(),
               '/tickets': (context) => const TicketsPage(),
               '/settings': (context) => const SettingsPage(),
+              '/create-post': (context) => const CreatePostPage(),
+              '/post-detail': (context) {
+                final post =
+                    ModalRoute.of(context)!.settings.arguments as PostModel;
+                return PostDetailPage(post: post);
+              },
+              '/my-posts': (context) => const MyPostsScreen(),
+              '/edit-post': (context) {
+                final post =
+                    ModalRoute.of(context)!.settings.arguments as PostModel;
+                return EditPostPage(post: post);
+              },
             },
           );
         },

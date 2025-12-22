@@ -25,6 +25,25 @@ class StorageService {
     }
   }
 
+  /// Upload a post image file to Firebase Storage
+  /// Returns the download URL of the uploaded image
+  Future<String> uploadPostImage(File imageFile, String postId) async {
+    try {
+      // Create a unique filename
+      final fileName = '${postId}_${DateTime.now().millisecondsSinceEpoch}${path.extension(imageFile.path)}';
+      final ref = _storage.ref().child('post_images').child(fileName);
+
+      // Upload the file
+      await ref.putFile(imageFile);
+
+      // Get the download URL
+      final downloadUrl = await ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      throw 'Failed to upload image: ${e.toString()}';
+    }
+  }
+
   /// Delete an image from Firebase Storage
   Future<void> deleteImage(String imageUrl) async {
     try {

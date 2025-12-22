@@ -61,6 +61,75 @@ service cloud.firestore {
       allow delete: if request.auth != null
         && resource.data.userId == request.auth.uid;
     }
+
+    // Posts collection rules
+    match /posts/{postId} {
+      // Allow read: Anyone can read posts (public data)
+      allow read: if request.auth != null;
+      
+      // Allow create: Only authenticated users can create posts
+      allow create: if request.auth != null
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt is timestamp;
+      
+      // Allow update: Only the creator can update their own posts
+      // Also allow updates to likes/comments count (for like/comment operations)
+      // When using .update(), request.resource.data contains merged data
+      allow update: if request.auth != null
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (
+          // Creator can update anything
+          resource.data.createdBy == request.auth.uid
+          ||
+          // Anyone can update likes/comments (but nothing else changes)
+          (request.resource.data.likes is int && request.resource.data.comments is int)
+        );
+      
+      // Allow delete: Only the creator can delete their own posts
+      allow delete: if request.auth != null
+        && resource.data.createdBy == request.auth.uid;
+
+      // Likes subcollection rules
+      match /likes/{userId} {
+        // Allow read: Anyone can see who liked a post
+        allow read: if request.auth != null;
+        
+        // Allow create: Users can like posts (only their own like document)
+        allow create: if request.auth != null
+          && userId == request.auth.uid
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.createdAt is timestamp;
+        
+        // Allow delete: Users can unlike posts (only their own like document)
+        allow delete: if request.auth != null
+          && userId == request.auth.uid;
+      }
+    }
+
+    // Comments collection rules
+    match /comments/{commentId} {
+      // Allow read: Anyone can read comments
+      allow read: if request.auth != null;
+      
+      // Allow create: Only authenticated users can create comments
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.postId is string
+        && request.resource.data.content is string
+        && request.resource.data.createdAt is timestamp;
+      
+      // Allow delete: Only the comment creator can delete their own comments
+      allow delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
+
+
+
+     // Users collection rules (profile photo etc.)
+		match /users/{uid} {
+ 			allow read, write: if request.auth != null && request.auth.uid == uid;
+		}
     
     // Default: Deny all other access
     match /{document=**} {

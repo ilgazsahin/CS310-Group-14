@@ -3,6 +3,7 @@ import '../models/data_models.dart';
 import '../services/firestore_service.dart';
 import '../utils/app_styles.dart';
 import '../theme.dart';
+import '../utils/navigation_helper.dart';
 import 'event_detail_page.dart';
 import 'edit_event_page.dart';
 
@@ -159,7 +160,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
               Navigator.pushNamed(context, '/search');
               break;
             case 2:
-              Navigator.pushNamed(context, '/create-event');
+              showCreateDialog(context);
               break;
             case 3:
               Navigator.pushNamed(context, '/tickets');

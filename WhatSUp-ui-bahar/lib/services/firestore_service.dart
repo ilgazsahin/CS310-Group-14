@@ -446,4 +446,349 @@ class FirestoreService {
           return events.whereType<EventModel>().toList();
         });
   }
+
+  // ========== POST OPERATIONS ==========
+
+  // Collection reference for posts
+  CollectionReference get _postsCollection =>
+      _firestore.collection('posts');
+
+  /// CREATE: Add a new post to Firestore
+  Future<String> createPost(PostModel post) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to create posts';
+      }
+
+      // Ensure createdBy is set to current user ID
+      // Keep authorName if provided, otherwise use email display name
+      final postWithUser = post.copyWith(
+        createdBy: user.uid,
+        createdAt: DateTime.now(),
+        // authorName is already set in the post model from the form
+      );
+
+      final postData = postWithUser.toFirestore();
+      final docRef = await _postsCollection.add(postData);
+      return docRef.id;
+    } catch (e) {
+      if (e.toString().contains('PERMISSION_DENIED')) {
+        throw 'Permission denied. Please check Firestore security rules are deployed correctly.';
+      } else if (e.toString().contains('UNAUTHENTICATED')) {
+        throw 'You must be logged in to create posts.';
+      }
+      throw 'Failed to create post: ${e.toString()}';
+    }
+  }
+
+  /// READ: Get a single post by ID
+  Future<PostModel?> getPost(String postId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to view posts';
+      }
+
+      final doc = await _postsCollection.doc(postId).get();
+      if (doc.exists) {
+        return PostModel.fromFirestore(doc);
+      }
+      return null;
+    } catch (e) {
+      throw 'Failed to get post: ${e.toString()}';
+    }
+  }
+
+  /// READ: Get all posts (real-time stream)
+  Stream<List<PostModel>> getPostsStream() {
+    final user = _authService.currentUser;
+    if (user == null) {
+      return Stream.value([]);
+    }
+
+    return _postsCollection
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => PostModel.fromFirestore(doc))
+              .toList();
+        })
+        .handleError((error) {
+          print('Error in getPostsStream: $error');
+          throw error;
+        });
+  }
+
+  /// READ: Get posts created by current user (real-time stream)
+  Stream<List<PostModel>> getUserPostsStream() {
+    final user = _authService.currentUser;
+    if (user == null) {
+      return Stream.value([]);
+    }
+
+    // Query with composite index: createdBy + createdAt
+    return _postsCollection
+        .where('createdBy', isEqualTo: user.uid)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => PostModel.fromFirestore(doc))
+              .toList();
+        });
+  }
+
+  /// UPDATE: Update an existing post
+  Future<void> updatePost(String postId, PostModel post) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to update posts';
+      }
+
+      // Get the existing post to verify ownership
+      final existingPost = await getPost(postId);
+      if (existingPost == null) {
+        throw 'Post not found';
+      }
+
+      if (existingPost.createdBy != user.uid) {
+        throw 'You can only update your own posts';
+      }
+
+      // Update with new timestamp
+      final updatedPost = post.copyWith(updatedAt: DateTime.now());
+
+      await _postsCollection.doc(postId).update(updatedPost.toFirestore());
+    } catch (e) {
+      throw 'Failed to update post: ${e.toString()}';
+    }
+  }
+
+  /// DELETE: Delete a post
+  Future<void> deletePost(String postId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to delete posts';
+      }
+
+      // Get the existing post to verify ownership
+      final existingPost = await getPost(postId);
+      if (existingPost == null) {
+        throw 'Post not found';
+      }
+
+      if (existingPost.createdBy != user.uid) {
+        throw 'You can only delete your own posts';
+      }
+
+      await _postsCollection.doc(postId).delete();
+    } catch (e) {
+      throw 'Failed to delete post: ${e.toString()}';
+    }
+  }
+
+  /// Check if user can edit/delete a post
+  bool canUserModifyPost(PostModel post) {
+    final user = _authService.currentUser;
+    if (user == null) return false;
+    return post.createdBy == user.uid;
+  }
+
+  // ========== LIKES ==========
+
+  /// Collection reference for likes (subcollection of posts)
+  CollectionReference _getLikesCollection(String postId) {
+    return _postsCollection.doc(postId).collection('likes');
+  }
+
+  /// Check if current user has liked a post
+  Future<bool> hasUserLikedPost(String postId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) return false;
+
+      final likeDoc = await _getLikesCollection(postId).doc(user.uid).get();
+      return likeDoc.exists;
+    } catch (e) {
+      print('Error checking like: $e');
+      return false;
+    }
+  }
+
+  /// Get like count for a post
+  Future<int> getPostLikeCount(String postId) async {
+    try {
+      final snapshot = await _getLikesCollection(postId).get();
+      return snapshot.docs.length;
+    } catch (e) {
+      print('Error getting like count: $e');
+      return 0;
+    }
+  }
+
+  /// Like a post
+  Future<void> likePost(String postId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to like posts';
+      }
+
+      // Check if already liked
+      final alreadyLiked = await hasUserLikedPost(postId);
+      if (alreadyLiked) {
+        return; // Already liked, do nothing
+      }
+
+      // Add like document
+      await _getLikesCollection(postId).doc(user.uid).set({
+        'userId': user.uid,
+        'createdAt': Timestamp.now(),
+      });
+
+      // Update post like count
+      final currentCount = await getPostLikeCount(postId);
+      await _postsCollection.doc(postId).update({
+        'likes': currentCount,
+      });
+    } catch (e) {
+      throw 'Failed to like post: ${e.toString()}';
+    }
+  }
+
+  /// Unlike a post
+  Future<void> unlikePost(String postId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to unlike posts';
+      }
+
+      // Remove like document
+      await _getLikesCollection(postId).doc(user.uid).delete();
+
+      // Update post like count
+      final currentCount = await getPostLikeCount(postId);
+      await _postsCollection.doc(postId).update({
+        'likes': currentCount,
+      });
+    } catch (e) {
+      throw 'Failed to unlike post: ${e.toString()}';
+    }
+  }
+
+  /// Toggle like status (like if not liked, unlike if liked)
+  Future<void> toggleLikePost(String postId) async {
+    final hasLiked = await hasUserLikedPost(postId);
+    if (hasLiked) {
+      await unlikePost(postId);
+    } else {
+      await likePost(postId);
+    }
+  }
+
+  // ========== COMMENTS ==========
+
+  /// Collection reference for comments
+  CollectionReference get _commentsCollection => _firestore.collection('comments');
+
+  /// CREATE: Add a comment to a post
+  Future<String> createComment(CommentModel comment) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to comment';
+      }
+
+      // Ensure userId is set to current user
+      final commentWithUser = comment.copyWith(
+        userId: user.uid,
+        createdAt: DateTime.now(),
+      );
+
+      final commentData = commentWithUser.toFirestore();
+      final docRef = await _commentsCollection.add(commentData);
+
+      // Update post comment count
+      final post = await getPost(comment.postId);
+      if (post != null) {
+        final commentCount = await getPostCommentCount(comment.postId);
+        await _postsCollection.doc(comment.postId).update({
+          'comments': commentCount,
+        });
+      }
+
+      return docRef.id;
+    } catch (e) {
+      throw 'Failed to create comment: ${e.toString()}';
+    }
+  }
+
+  /// READ: Get comments for a post (real-time stream)
+  Stream<List<CommentModel>> getCommentsStream(String postId) {
+    return _commentsCollection
+        .where('postId', isEqualTo: postId)
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => CommentModel.fromFirestore(doc))
+              .toList();
+        });
+  }
+
+  /// Get comment count for a post
+  Future<int> getPostCommentCount(String postId) async {
+    try {
+      final snapshot = await _commentsCollection
+          .where('postId', isEqualTo: postId)
+          .get();
+      return snapshot.docs.length;
+    } catch (e) {
+      print('Error getting comment count: $e');
+      return 0;
+    }
+  }
+
+  /// DELETE: Delete a comment
+  Future<void> deleteComment(String commentId, String postId) async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw 'User must be logged in to delete comments';
+      }
+
+      // Get comment to verify ownership
+      final commentDoc = await _commentsCollection.doc(commentId).get();
+      if (!commentDoc.exists) {
+        throw 'Comment not found';
+      }
+
+      final commentData = commentDoc.data() as Map<String, dynamic>;
+      if (commentData['userId'] != user.uid) {
+        throw 'You can only delete your own comments';
+      }
+
+      await _commentsCollection.doc(commentId).delete();
+
+      // Update post comment count
+      final commentCount = await getPostCommentCount(postId);
+      await _postsCollection.doc(postId).update({
+        'comments': commentCount,
+      });
+    } catch (e) {
+      throw 'Failed to delete comment: ${e.toString()}';
+    }
+  }
+
+  /// Check if user can delete a comment
+  bool canUserDeleteComment(CommentModel comment) {
+    final user = _authService.currentUser;
+    if (user == null) return false;
+    return comment.userId == user.uid;
+  }
 }

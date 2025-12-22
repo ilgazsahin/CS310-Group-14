@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme.dart';
 import '../models/data_models.dart';
 import '../services/firestore_service.dart';
+import '../utils/navigation_helper.dart';
 
 class EventDetailPage extends StatefulWidget {
   final EventModel event;
@@ -157,55 +158,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
     }
   }
 
-  void _showDeleteDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Event'),
-        content: Text(
-          'Are you sure you want to delete "${widget.event.title}"? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              if (widget.event.id != null) {
-                try {
-                  await _firestoreService.deleteEvent(widget.event.id!);
-                  if (context.mounted) {
-                    Navigator.pop(context); // Go back to previous screen
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Event deleted successfully!'),
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Failed to delete event: ${e.toString()}',
-                        ),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              }
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -234,11 +186,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
                 ? 'Remove from favorites'
                 : 'Add to favorites',
           ),
-          if (_firestoreService.canUserModifyEvent(widget.event))
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.white),
-              onPressed: () => _showDeleteDialog(),
-            ),
         ],
       ),
 
@@ -268,7 +215,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
               Navigator.pushNamed(context, '/search');
               break;
             case 2:
-              Navigator.pushNamed(context, '/create-event');
+              showCreateDialog(context);
               break;
             case 3:
               Navigator.pushNamed(context, '/tickets');

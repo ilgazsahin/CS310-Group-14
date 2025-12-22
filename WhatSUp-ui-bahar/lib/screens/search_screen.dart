@@ -1,40 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/data_models.dart';
 import '../utils/app_style.dart';
+import '../utils/navigation_helper.dart';
+import 'package:provider/provider.dart';
+import '../providers/post_provider.dart';
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
-
-  static final List<PostModel> _posts = [
-    PostModel(
-      username: "Movie Night!",
-      caption: "Come join us for Interstellar!",
-      imageUrl: "https://img.freepik.com/free-photo/popcorn-juice-movie-night_23-2148470131.jpg?semt=ais_hybrid&w=740&q=80",
-      likes: 32,
-      comments: 14,
-    ),
-    PostModel(
-      username: "Picnic with everybody!",
-      caption: "Sunny day at the campus lake.",
-      imageUrl: "https://images.stockcake.com/public/7/f/a/7fab551b-02f6-40d2-94c2-06138b16c4c0_large/idyllic-lakeside-picnic-stockcake.jpg",
-      likes: 27,
-      comments: 5,
-    ),
-    PostModel(
-      username: "Tech Talk",
-      caption: "Learning Flutter is fun.",
-      imageUrl: "https://media.istockphoto.com/id/2174406748/photo/woman-is-presenting-a-phone.jpg?s=612x612&w=0&k=20&c=ccnWslGUMEonLey8OWp3RDNFESYUg_ST0WuFQQSBwQE=",
-      likes: 102,
-      comments: 45,
-    ),
-    PostModel(
-      username: "Music Fest",
-      caption: "Live music tonight!",
-      imageUrl: "https://www.udiscovermusic.com/wp-content/uploads/2017/06/Coachella-GettyImages-673625850-1000x600.jpg",
-      likes: 150,
-      comments: 60,
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +23,13 @@ class SearchScreen extends StatelessWidget {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.add_box_outlined), label: 'Add'),
+            icon: Icon(Icons.add_box_outlined),
+            label: 'Add',
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.confirmation_number), label: 'Tickets'),
+            icon: Icon(Icons.confirmation_number),
+            label: 'Tickets',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         onTap: (index) {
@@ -65,7 +41,7 @@ class SearchScreen extends StatelessWidget {
               Navigator.pushNamed(context, '/search');
               break;
             case 2:
-              Navigator.pushNamed(context, '/create-event');
+              showCreateDialog(context);
               break;
             case 3:
               Navigator.pushNamed(context, '/tickets');
@@ -94,7 +70,10 @@ class SearchScreen extends StatelessWidget {
                     SizedBox(width: 15),
                     Icon(Icons.search, color: Colors.white, size: 28),
                     SizedBox(width: 10),
-                    Text("Search", style: TextStyle(color: Colors.white, fontSize: 18)),
+                    Text(
+                      "Search",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
                   ],
                 ),
               ),
@@ -102,13 +81,95 @@ class SearchScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _posts.length,
-              itemBuilder: (context, index) {
-                return _buildPostCard(context, _posts[index]);
+            // Real-time Firestore stream for posts
+            StreamBuilder<List<PostModel>>(
+              stream: Provider.of<PostProvider>(
+                context,
+                listen: false,
+              ).allPosts,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  final error = snapshot.error.toString();
+                  String errorMessage = 'Error loading posts';
+                  String helpText = '';
+
+                  if (error.contains('permission-denied')) {
+                    errorMessage = 'Permission Denied';
+                    helpText =
+                        'Please make sure:\n1. You are logged in\n2. Firestore security rules are deployed\n3. Check Firebase Console → Firestore → Rules';
+                  } else {
+                    errorMessage = 'Error loading posts';
+                    helpText = error;
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            errorMessage,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            helpText,
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                final posts = snapshot.data ?? [];
+
+                if (posts.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Center(
+                      child: Text(
+                        'No posts found. Create your first post!',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    return _buildPostCard(context, posts[index]);
+                  },
+                );
               },
             ),
           ],
@@ -118,50 +179,126 @@ class SearchScreen extends StatelessWidget {
   }
 
   Widget _buildPostCard(BuildContext context, PostModel post) {
-    return Container(
-      color: Theme.of(context).cardColor,
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.network(
-            post.imageUrl,
-            width: double.infinity,
-            height: 250,
-            fit: BoxFit.cover,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                const Icon(Icons.thumb_up_alt_outlined),
-                const SizedBox(width: 4),
-                Text("${post.likes}"),
-                const SizedBox(width: 20),
-                const Icon(Icons.chat_bubble_outline),
-                const SizedBox(width: 4),
-                Text("${post.comments}"),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
-            child: Row(
-              children: [
-                const Icon(Icons.account_circle, size: 28),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(post.username, style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                    Text(post.caption, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6))),
-                  ],
+    // Get first image if available, or show placeholder
+    final firstImage = post.imageUrls.isNotEmpty ? post.imageUrls.first : null;
+
+    // Get preview of content (first 100 characters)
+    final contentPreview = post.content.length > 100
+        ? '${post.content.substring(0, 100)}...'
+        : post.content;
+
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, '/post-detail', arguments: post);
+      },
+      child: Container(
+        color: Theme.of(context).cardColor,
+        margin: const EdgeInsets.only(bottom: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Post Image
+            if (firstImage != null)
+              Image.network(
+                firstImage,
+                width: double.infinity,
+                height: 250,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: double.infinity,
+                    height: 250,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.image_not_supported, size: 50),
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    width: double.infinity,
+                    height: 250,
+                    color: Colors.grey[200],
+                    child: const Center(child: CircularProgressIndicator()),
+                  );
+                },
+              )
+            else
+              Container(
+                width: double.infinity,
+                height: 250,
+                color: Colors.grey[300],
+                child: const Icon(Icons.article, size: 50, color: Colors.grey),
+              ),
+
+            // Post Title
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                post.title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-        ],
+
+            // Stats (Likes and Comments)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Row(
+                children: [
+                  const Icon(Icons.thumb_up_alt_outlined, size: 20),
+                  const SizedBox(width: 4),
+                  Text("${post.likes}"),
+                  const SizedBox(width: 20),
+                  const Icon(Icons.chat_bubble_outline, size: 20),
+                  const SizedBox(width: 4),
+                  Text("${post.comments}"),
+                ],
+              ),
+            ),
+
+            // Author and Content Preview
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.account_circle, size: 28),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          post.authorName ?? 'Unknown Author',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          contentPreview,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
       ),
     );
   }

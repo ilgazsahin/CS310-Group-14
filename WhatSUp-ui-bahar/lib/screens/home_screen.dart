@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/data_models.dart';
 import '../utils/app_style.dart';
 import '../services/firestore_service.dart';
+import '../utils/navigation_helper.dart';
 import 'event_detail_page.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -52,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.pushNamed(context, '/search');
               break;
             case 2:
-              Navigator.pushNamed(context, '/create-event');
+              showCreateDialog(context);
               break;
             case 3:
               Navigator.pushNamed(context, '/tickets');

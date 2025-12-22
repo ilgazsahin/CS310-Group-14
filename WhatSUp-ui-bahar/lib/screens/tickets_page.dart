@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme.dart';
 import '../models/data_models.dart';
 import '../services/firestore_service.dart';
+import '../utils/navigation_helper.dart';
 
 class TicketsPage extends StatefulWidget {
   const TicketsPage({super.key});
@@ -30,7 +31,7 @@ class _TicketsPageState extends State<TicketsPage> {
         Navigator.pushReplacementNamed(context, '/search');
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, '/create-event');
+        showCreateDialog(context);
         break;
       case 3:
       // Already on tickets

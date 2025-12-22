@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/app_styles.dart';
 import '../theme.dart';
+import '../utils/navigation_helper.dart';
 import '../providers/auth_provider.dart';
 import '../services/profile_photo_service.dart';
 
@@ -105,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.pushNamed(context, '/search');
               break;
             case 2:
-              Navigator.pushNamed(context, '/create-event');
+              showCreateDialog(context);
               break;
             case 3:
               Navigator.pushNamed(context, '/tickets');
@@ -224,6 +225,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 _buildProfileButton(context, 'My Listings', () {
                   Navigator.pushNamed(context, '/my_listings');
+                }),
+                const SizedBox(height: 15),
+
+                _buildProfileButton(context, 'My Posts', () {
+                  Navigator.pushNamed(context, '/my-posts');
                 }),
                 const SizedBox(height: 15),
 

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../theme.dart';
-import '../services/firestore_service.dart';
 import '../services/storage_service.dart';
 import '../models/data_models.dart';
 import 'package:provider/provider.dart'; // added
@@ -37,7 +36,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
   File? _selectedImage;
 
   String? _selectedCategory;
-  final FirestoreService _firestoreService = FirestoreService();
   final StorageService _storageService = StorageService();
   bool _isSaving = false;
 

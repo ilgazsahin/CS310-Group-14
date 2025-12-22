@@ -110,19 +110,148 @@ class EventModel {
 }
 
 class PostModel {
-  final String username;
-  final String caption;
-  final String imageUrl;
-  final int likes;
-  final int comments;
+  final String? id; // Firestore document ID
+  final String title; // Post title
+  final String content; // Blog post content/text
+  final List<String> imageUrls; // Multiple images (URLs or uploaded)
+  final String createdBy; // User ID who created the post
+  final String? authorName; // Display name of author (optional, can be fetched from user profile)
+  final DateTime createdAt; // Timestamp when post was created
+  final DateTime? updatedAt; // Timestamp when post was last updated
+  final int likes; // Number of likes
+  final int comments; // Number of comments
 
   PostModel({
-    required this.username,
-    required this.caption,
-    required this.imageUrl,
-    required this.likes,
-    required this.comments,
+    this.id,
+    required this.title,
+    required this.content,
+    this.imageUrls = const [],
+    required this.createdBy,
+    this.authorName,
+    required this.createdAt,
+    this.updatedAt,
+    this.likes = 0,
+    this.comments = 0,
   });
+
+  // Constructor from Firestore document
+  factory PostModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return PostModel(
+      id: doc.id,
+      title: data['title'] ?? '',
+      content: data['content'] ?? '',
+      imageUrls: List<String>.from(data['imageUrls'] ?? []),
+      createdBy: data['createdBy'] ?? '',
+      authorName: data['authorName'],
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+      likes: data['likes'] ?? 0,
+      comments: data['comments'] ?? 0,
+    );
+  }
+
+  // Convert to Firestore document
+  Map<String, dynamic> toFirestore() {
+    return {
+      'title': title,
+      'content': content,
+      'imageUrls': imageUrls,
+      'createdBy': createdBy,
+      if (authorName != null) 'authorName': authorName,
+      'createdAt': Timestamp.fromDate(createdAt),
+      if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
+      'likes': likes,
+      'comments': comments,
+    };
+  }
+
+  // Copy with method for updates
+  PostModel copyWith({
+    String? id,
+    String? title,
+    String? content,
+    List<String>? imageUrls,
+    String? createdBy,
+    String? authorName,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? likes,
+    int? comments,
+  }) {
+    return PostModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      imageUrls: imageUrls ?? this.imageUrls,
+      createdBy: createdBy ?? this.createdBy,
+      authorName: authorName ?? this.authorName,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      likes: likes ?? this.likes,
+      comments: comments ?? this.comments,
+    );
+  }
+}
+
+class CommentModel {
+  final String? id; // Firestore document ID
+  final String postId; // Post this comment belongs to
+  final String userId; // User who created the comment
+  final String? authorName; // Display name of comment author
+  final String content; // Comment text content
+  final DateTime createdAt; // When comment was created
+
+  CommentModel({
+    this.id,
+    required this.postId,
+    required this.userId,
+    this.authorName,
+    required this.content,
+    required this.createdAt,
+  });
+
+  // Constructor from Firestore document
+  factory CommentModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return CommentModel(
+      id: doc.id,
+      postId: data['postId'] ?? '',
+      userId: data['userId'] ?? '',
+      authorName: data['authorName'],
+      content: data['content'] ?? '',
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    );
+  }
+
+  // Convert to Firestore document
+  Map<String, dynamic> toFirestore() {
+    return {
+      'postId': postId,
+      'userId': userId,
+      if (authorName != null) 'authorName': authorName,
+      'content': content,
+      'createdAt': Timestamp.fromDate(createdAt),
+    };
+  }
+
+  CommentModel copyWith({
+    String? id,
+    String? postId,
+    String? userId,
+    String? authorName,
+    String? content,
+    DateTime? createdAt,
+  }) {
+    return CommentModel(
+      id: id ?? this.id,
+      postId: postId ?? this.postId,
+      userId: userId ?? this.userId,
+      authorName: authorName ?? this.authorName,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }
 
 class TicketModel {
