@@ -15,7 +15,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
-  
+
   String? _validateName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Name and Surname cannot be empty';
@@ -25,7 +25,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
     return null;
   }
-  
+
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email cannot be empty';
@@ -39,7 +39,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
     return null;
   }
-  
+
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password cannot be empty';
@@ -49,7 +49,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
     return null;
   }
-  
+
   Future<void> _handleSignUp() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -63,7 +63,7 @@ class _SignUpPageState extends State<SignUpPage> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-      
+
       // Success - navigation will be handled by AuthWrapper
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');
@@ -72,24 +72,24 @@ class _SignUpPageState extends State<SignUpPage> {
       // Show error message - the AuthService already provides user-friendly messages
       if (mounted) {
         // Extract the error message (it's already a user-friendly string from AuthService)
-        final errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('Error: ', '');
-        
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
+        final errorMessage = e
+            .toString()
+            .replaceAll('Exception: ', '')
+            .replaceAll('Error: ', '');
+
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
             title: const Text('Sign Up Failed'),
-            content: Text(
-              errorMessage,
-              style: const TextStyle(fontSize: 14),
-            ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+            content: Text(errorMessage, style: const TextStyle(fontSize: 14)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -97,7 +97,7 @@ class _SignUpPageState extends State<SignUpPage> {
       }
     }
   }
-  
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -156,189 +156,203 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                           child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Create Account',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF9EFF1F),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            'Only @sabanciuniv.edu mail addresses can access',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        
-                        const Text(
-                          'Name and Surname',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _nameController,
-                          validator: _validateName,
-                          keyboardType: TextInputType.name,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: InputDecoration(
-                            hintText: 'value',
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.9),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        
-                        const Text(
-                          'Email',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _emailController,
-                          validator: _validateEmail,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          decoration: InputDecoration(
-                            hintText: 'value',
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.9),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                            suffixIcon: IconButton(
-                              icon: const Text(
-                                '@',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF594ABF),
-                                ),
-                              ),
-                              onPressed: () {
-                                final currentText = _emailController.text;
-                                final selection = _emailController.selection;
-                                final newText = currentText.substring(0, selection.start) +
-                                    '@' +
-                                    currentText.substring(selection.end);
-                                _emailController.value = TextEditingValue(
-                                  text: newText,
-                                  selection: TextSelection.collapsed(
-                                    offset: selection.start + 1,
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Create Account',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF9EFF1F),
                                   ),
-                                );
-                              },
-                              tooltip: 'Insert @ symbol',
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        
-                        const Text(
-                          'Password',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _passwordController,
-                          validator: _validatePassword,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            hintText: 'value',
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.9),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleSignUp,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF594ABF),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Color(0xFF594ABF),
+                                ),
+                                const SizedBox(height: 16),
+
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Text(
+                                    'Only @sabanciuniv.edu mail addresses can access',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+
+                                const Text(
+                                  'Name and Surname',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _nameController,
+                                  validator: _validateName,
+                                  keyboardType: TextInputType.name,
+                                  textCapitalization: TextCapitalization.words,
+                                  decoration: InputDecoration(
+                                    hintText: 'value',
+                                    filled: true,
+                                    fillColor: Colors.white.withOpacity(0.9),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+
+                                const Text(
+                                  'Email',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _emailController,
+                                  validator: _validateEmail,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  autocorrect: false,
+                                  enableSuggestions: false,
+                                  decoration: InputDecoration(
+                                    hintText: 'value',
+                                    filled: true,
+                                    fillColor: Colors.white.withOpacity(0.9),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: const Text(
+                                        '@',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF594ABF),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        final currentText =
+                                            _emailController.text;
+                                        final selection =
+                                            _emailController.selection;
+                                        final newText =
+                                            currentText.substring(
+                                              0,
+                                              selection.start,
+                                            ) +
+                                            '@' +
+                                            currentText.substring(
+                                              selection.end,
+                                            );
+                                        _emailController
+                                            .value = TextEditingValue(
+                                          text: newText,
+                                          selection: TextSelection.collapsed(
+                                            offset: selection.start + 1,
+                                          ),
+                                        );
+                                      },
+                                      tooltip: 'Insert @ symbol',
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+
+                                const Text(
+                                  'Password',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _passwordController,
+                                  validator: _validatePassword,
+                                  obscureText: true,
+                                  decoration: InputDecoration(
+                                    hintText: 'value',
+                                    filled: true,
+                                    fillColor: Colors.white.withOpacity(0.9),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: _isLoading
+                                        ? null
+                                        : _handleSignUp,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: const Color(0xFF594ABF),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 14,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                  )
-                                : const Text(
-                                    'Sign Up',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
+                                    child: _isLoading
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Color(0xFF594ABF),
+                                                  ),
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Sign Up',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
                         const SizedBox(height: 30),
-                        
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -350,7 +364,8 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                             ),
                             TextButton(
-                              onPressed: () => Navigator.pushNamed(context, '/login'),
+                              onPressed: () =>
+                                  Navigator.pushNamed(context, '/login'),
                               style: TextButton.styleFrom(
                                 foregroundColor: Color(0xFF9EFF1F),
                                 padding: EdgeInsets.zero,
@@ -374,7 +389,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
