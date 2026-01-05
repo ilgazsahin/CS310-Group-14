@@ -107,19 +107,19 @@ flutter run -d macos  # macOS
 flutter run -d windows  # Windows
 flutter run -d linux  # Linux
 ```
-## 5. How to run tests
+### 5. How to run tests
 
 All tests are located under `WhatSUp-ui-bahar/test/`.
 
-### 1) Go to the Flutter project directory
+#### 1) Go to the Flutter project directory
 ```bash
 cd WhatSUp-ui-bahar
 ```
-### 2) Install dependencies (first time, or after pulling new changes)
+#### 2) Install dependencies (first time, or after pulling new changes)
 ```bash
 flutter pub get
 ```
-### 3) Run all tests (unit + widget)
+#### 3) Run all tests (unit + widget)
 ```bash
 flutter test
 
@@ -127,7 +127,7 @@ flutter test
 // flutter test --reporter expanded
 ```
 
-### Expected Results
+#### Expected Results
 
 If everything passes, Flutter prints something similar to:
 
