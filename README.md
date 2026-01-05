@@ -11,7 +11,7 @@
 | Nil Karahan        | 32142      |Documentation & Submission Lead   |
 
 
-A Flutter-based mobile app for Sabancı University students to discover, create, and receive notifications about campus events, unifying official and spontaneous activities in a single SU-only platform while engaging with a community through posts, comments, and interactions.
+A Flutter-based mobile app for Sabancı University students to discover, create, and receive notifications about campus events, unifying official and spontaneous activities in a single SU-only platform.
 
 ## Project Overview
 
