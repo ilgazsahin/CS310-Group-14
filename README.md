@@ -107,7 +107,17 @@ flutter run -d macos  # macOS
 flutter run -d windows  # Windows
 flutter run -d linux  # Linux
 ```
-### 5. How to run tests
+### 5. How to run tests and what they cover
+
+- **`test/event_provider_unit_test.dart`**
+  - **Create event (success path):** Verifies `EventProvider.createEvent(...)` delegates to the Firestore service, calls `notifyListeners()` exactly once, and returns the created `eventId`.
+  - **Delete event (success path):** Verifies `EventProvider.deleteEvent(...)` delegates to the service and triggers `notifyListeners()` exactly once.
+  - **Events stream exposure:** Confirms `allEvents` correctly exposes the underlying events stream and emits values as expected.
+  - **Create event (failure path):** Ensures exceptions from the service propagate upward and `notifyListeners()` is **not** called when creation fails.
+
+- **`test/event_provider_widget_test.dart`**
+  - **Provider - UI integration (create):** Pumps a minimal widget tree with `ChangeNotifierProvider` + `Consumer`, taps a “Create” button, and verifies the widget rebuilds after `createEvent(...)` (i.e., `notifyListeners()` triggers UI update).
+  - **Provider - UI integration (delete):** Same pattern for `deleteEvent(...)`, confirming the UI rebuilds after deletion is triggered.
 
 All tests are located under `WhatSUp-ui-bahar/test/`.
 
