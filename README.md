@@ -154,48 +154,7 @@ lib/
 └── main.dart            # App entry point
 ```
 
-##  Key Features
-
-### Authentication
-- Email/password registration and login
-- Secure authentication state management
-- Password update 
-
-### Events
-- Create, read, update, delete events
-- Category filtering (Academic, Clubs, Social)
-- Calendar view with date-based filtering
-- Image uploads for events
-- Favorite events functionality
-
-### Posts
-- Create and manage blog-style posts
-- Multiple image support per post
-- Like and comment system
-- User-specific post management
-
-### Tickets
-- Book tickets for events
-- View and manage booked tickets
-- Favorite ticket functionality
-
-### User Features
-- Profile management
-- Profile photo upload
-- Theme customization (Light/Dark mode)
-- Personal event and post listings
-
-## Security
-
-The app implements comprehensive security rules in Firestore:
-- Authentication required for all operations
-- Users can only modify their own content
-- Proper validation of data on create/update
-- Secure image storage with Firebase Storage
-
 ## Known Limitations 
-
-### Current Limitations
 
 1. **Image Upload**: 
    - Large images may take time to upload depending on network speed
