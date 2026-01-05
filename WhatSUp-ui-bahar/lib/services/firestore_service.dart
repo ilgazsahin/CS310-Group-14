@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/data_models.dart';
 import 'auth_service.dart';
 
+import 'firestore_service_base.dart';
+
 /// Service class to handle Firestore CRUD operations for Events
-class FirestoreService {
+class FirestoreService implements FirestoreServiceBase{
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthService _authService = AuthService();
 
@@ -19,7 +21,7 @@ class FirestoreService {
     try {
       final user = _authService.currentUser;
       if (user == null) {
-        throw 'User must be logged in to create events';
+        throw Exception('User must be logged in to create events');
       }
 
       // Ensure createdBy is set to current user ID
@@ -40,7 +42,7 @@ class FirestoreService {
       if (createdDoc.exists) {
         print('Event document verified in Firestore'); // Debug log
       } else {
-        throw 'Event document was not created in Firestore';
+        throw Exception('Event document was not created in Firestore');
       }
 
       return docRef.id;
@@ -48,11 +50,11 @@ class FirestoreService {
       print('Firestore error: $e'); // Debug log
       // Provide more detailed error message
       if (e.toString().contains('PERMISSION_DENIED')) {
-        throw 'Permission denied. Please check Firestore security rules are deployed correctly.';
+        throw Exception('Permission denied. Please check Firestore security rules are deployed correctly.');
       } else if (e.toString().contains('UNAUTHENTICATED')) {
-        throw 'You must be logged in to create events.';
+        throw Exception('You must be logged in to create events.');
       }
-      throw 'Failed to create event: ${e.toString()}';
+      throw Exception('Failed to create event: ${e.toString()}');
     }
   }
 
@@ -61,7 +63,7 @@ class FirestoreService {
     try {
       final user = _authService.currentUser;
       if (user == null) {
-        throw 'User must be logged in to view events';
+        throw Exception('User must be logged in to view events');
       }
 
       final doc = await _eventsCollection.doc(eventId).get();
@@ -70,7 +72,7 @@ class FirestoreService {
       }
       return null;
     } catch (e) {
-      throw 'Failed to get event: ${e.toString()}';
+      throw Exception('Failed to get event: ${e.toString()}');
     }
   }
 
@@ -147,17 +149,17 @@ class FirestoreService {
     try {
       final user = _authService.currentUser;
       if (user == null) {
-        throw 'User must be logged in to update events';
+        throw Exception('User must be logged in to update events');
       }
 
       // Get the existing event to verify ownership
       final existingEvent = await getEvent(eventId);
       if (existingEvent == null) {
-        throw 'Event not found';
+        throw Exception('Event not found');
       }
 
       if (existingEvent.createdBy != user.uid) {
-        throw 'You can only update your own events';
+        throw Exception('You can only update your own events');
       }
 
       // Update with new timestamp
@@ -165,7 +167,7 @@ class FirestoreService {
 
       await _eventsCollection.doc(eventId).update(updatedEvent.toFirestore());
     } catch (e) {
-      throw 'Failed to update event: ${e.toString()}';
+      throw Exception('Failed to update event: ${e.toString()}');
     }
   }
 
@@ -174,22 +176,22 @@ class FirestoreService {
     try {
       final user = _authService.currentUser;
       if (user == null) {
-        throw 'User must be logged in to delete events';
+        throw Exception('User must be logged in to delete events');
       }
 
       // Get the existing event to verify ownership
       final existingEvent = await getEvent(eventId);
       if (existingEvent == null) {
-        throw 'Event not found';
+        throw Exception('Event not found');
       }
 
       if (existingEvent.createdBy != user.uid) {
-        throw 'You can only delete your own events';
+        throw Exception('You can only delete your own events');
       }
 
       await _eventsCollection.doc(eventId).delete();
     } catch (e) {
-      throw 'Failed to delete event: ${e.toString()}';
+      throw Exception('Failed to delete event: ${e.toString()}');
     }
   }
 
@@ -211,11 +213,11 @@ class FirestoreService {
     try {
       final user = _authService.currentUser;
       if (user == null) {
-        throw 'User must be logged in to create tickets';
+        throw Exception('User must be logged in to create tickets');
       }
 
       if (event.id == null) {
-        throw 'Event ID is required to create a ticket';
+        throw Exception('Event ID is required to create a ticket');
       }
 
       // Check if user already has a ticket for this event
@@ -225,7 +227,7 @@ class FirestoreService {
           .get();
 
       if (existingTickets.docs.isNotEmpty) {
-        throw 'You already have a ticket for this event';
+        throw Exception('You already have a ticket for this event');
       }
 
       // Create ticket with denormalized event data
@@ -248,7 +250,7 @@ class FirestoreService {
       final docRef = await _ticketsCollection.add(ticketData);
       return docRef.id;
     } catch (e) {
-      throw 'Failed to create ticket: ${e.toString()}';
+      throw Exception('Failed to create ticket: ${e.toString()}');
     }
   }
 
@@ -293,23 +295,23 @@ class FirestoreService {
     try {
       final user = _authService.currentUser;
       if (user == null) {
-        throw 'User must be logged in to update tickets';
+        throw Exception('User must be logged in to update tickets');
       }
 
       // Verify ownership
       final ticketDoc = await _ticketsCollection.doc(ticketId).get();
       if (!ticketDoc.exists) {
-        throw 'Ticket not found';
+        throw Exception('Ticket not found');
       }
 
       final ticketData = ticketDoc.data() as Map<String, dynamic>;
       if (ticketData['userId'] != user.uid) {
-        throw 'You can only update your own tickets';
+        throw Exception('You can only update your own tickets');
       }
 
       await _ticketsCollection.doc(ticketId).update({'isFavorite': isFavorite});
     } catch (e) {
-      throw 'Failed to update ticket: ${e.toString()}';
+      throw Exception('Failed to update ticket: ${e.toString()}');
     }
   }
 
